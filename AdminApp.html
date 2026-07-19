@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <style>
+    :root {
+      color-scheme: light;
+      --surface-1:      #fcfcfb;
+      --surface-2:      #f2f1ed;
+      --page:           #f9f9f7;
+      --text-primary:   #0b0b0b;
+      --text-secondary: #52514e;
+      --text-muted:     #898781;
+      --grid:           #e1e0d9;
+      --border:         rgba(11,11,11,0.10);
+      --accent:         #2a78d6;
+      --accent-bg:      rgba(42,120,214,0.10);
+      --critical:       #d03b3b;
+      --status-good:    #0ca30c;
+      --status-good-bg: rgba(12,163,12,0.10);
+      --status-warn:    #c98500;
+      --status-warn-bg: rgba(250,178,25,0.16);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --surface-1:      #1a1a19;
+        --surface-2:      #232322;
+        --page:           #0d0d0d;
+        --text-primary:   #ffffff;
+        --text-secondary: #c3c2b7;
+        --text-muted:     #898781;
+        --grid:           #2c2c2a;
+        --border:         rgba(255,255,255,0.10);
+        --accent:         #3987e5;
+        --accent-bg:      rgba(57,135,229,0.16);
+        --critical:       #e66767;
+        --status-good:    #0ca30c;
+        --status-good-bg: rgba(12,163,12,0.16);
+        --status-warn:    #fab219;
+        --status-warn-bg: rgba(250,178,25,0.14);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 26px 16px 56px;
+      background: var(--page);
+      color: var(--text-primary);
+      font-family: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    p.sub { color: var(--text-secondary); margin: 0 0 4px; font-size: 15px; line-height: 1.6; }
+    .back-link { font-size: 13px; color: var(--text-muted); }
+    .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+
+    .gate { max-width: 420px; margin: 60px auto; text-align: center; }
+    .gate input {
+      width: 100%; padding: 12px 14px; font-size: 17px; margin: 14px 0;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface-2); color: var(--text-primary); text-align: center;
+    }
+    button {
+      padding: 10px 20px; font-size: 15px; font-weight: 600;
+      border: none; border-radius: 8px; cursor: pointer;
+      background: var(--accent); color: #fff;
+    }
+    .ghost-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+    #student-picker {
+      padding: 10px 12px; font-size: 15px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text-primary); min-width: 220px;
+    }
+    .msg { font-size: 14px; color: var(--critical); margin-top: 10px; }
+
+    .stat-row { display: flex; flex-wrap: wrap; gap: 14px; }
+    .stat-tile { flex: 1 1 140px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .stat-tile .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .stat-tile .stat-value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .bar-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .bar-row { display: grid; grid-template-columns: 130px 1fr 40px; align-items: center; gap: 10px; font-size: 13px; }
+    .bar-track { height: 10px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+    .bar-value { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px; }
+    @media (max-width: 640px) { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-box { display: flex; flex-direction: column; align-items: center; }
+    .chart-box .chart-title { font-size: 14.5px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+    .axis-label { font-size: 12px; fill: var(--text-secondary); }
+    .grid-line { stroke: var(--grid); fill: none; }
+    .axis-line { stroke: var(--border); }
+
+    .section-title { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+    .section-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 16px; }
+    .legend-mini { display: flex; gap: 16px; font-size: 12.5px; color: var(--text-secondary); margin: -8px 0 16px; }
+    .legend-mini span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-mini .dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+    .group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 860px) { .group-grid { grid-template-columns: 1fr; } }
+    .group-card { border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; background: var(--surface-2); }
+    .group-card .group-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+    .group-card .group-title { font-size: 15px; font-weight: 700; }
+    .group-card .group-count { font-size: 12px; color: var(--text-muted); }
+    .group-mini-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0 10px; }
+    .group-mini-charts .mini-chart-title { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 2px; }
+    .group-feedback { font-size: 13px; line-height: 1.65; }
+    .group-feedback .fb-line { margin: 0 0 6px; }
+    .group-feedback .pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 9px; margin-right: 6px; }
+    .pill.good { color: var(--status-good); background: var(--status-good-bg); }
+    .pill.warn { color: var(--status-warn); background: var(--status-warn-bg); }
+    .group-feedback .tip { color: var(--text-secondary); }
+    .empty-hint { font-size: 13px; color: var(--text-muted); padding: 8px 0; }
+
+    .table-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .table-toolbar .hint { font-size: 12.5px; color: var(--text-muted); }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+    th, td { padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--grid); }
+    th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--surface-1); }
+    th:hover { color: var(--text-primary); }
+    th.sorted::after { content: ' ▾'; }
+    th.sorted.asc::after { content: ' ▴'; }
+    td:first-child, td:nth-child(2), td:nth-child(3) { font-variant-numeric: tabular-nums; }
+    .pill-warn { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--status-warn); background: var(--status-warn-bg); border-radius: 999px; padding: 3px 9px; }
+    a.view-link { color: var(--accent); font-weight: 600; text-decoration: none; font-size: 12.5px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="gate-view" class="gate card">
+      <h1>독서 진단 관리자 대시보드</h1>
+      <p class="sub">교사 전용 화면입니다. 접근 암호를 입력해 주세요.</p>
+      <input id="in-passcode" type="password" placeholder="암호 입력" autofocus>
+      <div><button id="btn-enter">입장하기</button></div>
+      <div id="gate-msg" class="msg"></div>
+    </div>
+
+    <div id="dash-view" class="hidden">
+      <div>
+        <h1>독서 진단 관리자 대시보드</h1>
+        <p class="sub">전체 학생 응답 현황과 학급 평균을 한눈에 확인하고, 학생별 상세 리포트로 바로 이동할 수 있어요.</p>
+        <a class="back-link" href="https://script.google.com/macros/s/AKfycbw9Sgm3nbS4BY-mfdrWuUf5aij7ms-dOblMmuAGeD1XEy5GDJ6KrhYV1FgonJSrQMgFWA/exec" target="_top">← 학생용 조회 화면으로 돌아가기</a>
+      </div>
+
+      <div class="card">
+        <div class="stat-row">
+          <div class="stat-tile"><div class="stat-label">전체 응답 학생 수</div><div id="stat-count" class="stat-value">-</div></div>
+          <div class="stat-tile"><div class="stat-label">가장 낮은 대영역(전체 평균)</div><div id="stat-weak-area" class="stat-value" style="font-size:16px;">-</div></div>
+          <div class="stat-tile"><div class="stat-label">가장 낮은 읽기 힘(전체 평균)</div><div id="stat-weak-cat" class="stat-value" style="font-size:16px;">-</div></div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-box">
+            <div class="chart-title">학급 전체 평균 · 5개 대영역</div>
+            <div id="chart-area"></div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title">학급 전체 평균 · 6개 하위영역</div>
+            <div id="chart-category"></div>
+          </div>
+        </div>
+
+        <div class="bar-list" id="bar-area"></div>
+        <div class="bar-list" id="bar-category" style="margin-top:16px;"></div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">학생 개별 조회</p>
+        <p class="section-sub">학년·반·번호를 선택하면 그 학생의 그래프와 피드백이 바로 아래에 나타납니다. (별도 페이지로 이동하지 않아요)</p>
+        <select id="student-picker">
+          <option value="">학생을 선택하세요</option>
+        </select>
+        <div id="student-picker-output" style="margin-top:16px;"></div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">학년별 비교</p>
+        <p class="section-sub">각 학년 평균을 전체 평균과 겹쳐서 비교합니다. 파란색 = 해당 학년, 초록색 = 전체 평균.</p>
+        <div class="legend-mini">
+          <span><span class="dot" style="background:var(--accent)"></span>해당 학년</span>
+          <span><span class="dot" style="background:var(--status-good)"></span>전체 평균</span>
+        </div>
+        <div id="groups-grade" class="group-grid"></div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">반별 비교</p>
+        <p class="section-sub">각 반 평균을 전체 평균과 겹쳐서 비교합니다. 파란색 = 해당 반, 초록색 = 전체 평균.</p>
+        <div class="legend-mini">
+          <span><span class="dot" style="background:var(--accent)"></span>해당 반</span>
+          <span><span class="dot" style="background:var(--status-good)"></span>전체 평균</span>
+        </div>
+        <div id="groups-class" class="group-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="table-toolbar">
+          <span class="hint">열 제목을 클릭하면 정렬됩니다 · 낮은 점수는 "관찰" 열에 자동 표시됩니다</span>
+          <button id="btn-export" class="ghost-btn">CSV로 내보내기</button>
+        </div>
+        <div class="table-scroll">
+          <table id="roster-table">
+            <thead><tr id="roster-head"></tr></thead>
+            <tbody id="roster-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCALE_MIN = <?= scaleMin ?>;
+    const SCALE_MAX = <?= scaleMax ?>;
+    let ROSTER = null;
+    let sortState = { col: 0, dir: 1 };
+
+    // 학생용 조회 화면의 배포 URL. "보기" 링크와 "학생용 조회로 돌아가기" 링크에 사용됨.
+    // 나중에 배포를 다시 만들어 URL이 바뀌면 이 값만 고치면 됩니다.
+    // (배포 → 배포 관리 → 새 버전으로만 업데이트하면 URL이 안 바뀌어서 이 값을 안 고쳐도 됩니다)
+    const STUDENT_APP_URL = 'https://script.google.com/macros/s/AKfycbw9Sgm3nbS4BY-mfdrWuUf5aij7ms-dOblMmuAGeD1XEy5GDJ6KrhYV1FgonJSrQMgFWA/exec';
+
+    function fmt(v) { return v == null ? '-' : v.toFixed(1); }
+    function css(varName) { return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+    function gapText(gap) { return (gap > 0 ? '+' : '') + gap.toFixed(1); }
+    function average(nums) {
+      const v = nums.filter(n => typeof n === 'number' && !isNaN(n));
+      if (!v.length) return null;
+      return v.reduce((a, b) => a + b, 0) / v.length;
+    }
+
+    // ---------- 영역/하위영역 지도 팁 (교사가 학급/학년 지도에 참고할 내용) ----------
+    const AREA_TIP = {
+      '독서흥미와 몰입': { desc: '책을 읽는 순간 자체를 즐기고 몰입하는 힘', tip: '완독·학습 목적을 강조하기보다 흥미를 느끼는 주제(만화, 그림책 등)부터 자유롭게 고르게 해주세요.' },
+      '독서주도성과 소통': { desc: '스스로 책을 고르고 읽는 힘, 읽은 내용을 나누는 힘', tip: '직접 책을 고르는 기회를 자주 주고, "오늘 읽은 책 어땠어?" 같은 편안한 대화를 자주 나눠주세요.' },
+      '독서자신감': { desc: '책을 읽고 이해하는 능력을 스스로 믿는 마음', tip: '읽기 수준보다 약간 쉬운 책으로 완독 성공 경험을 반복하게 하고, 결과보다 과정을 구체적으로 칭찬해주세요.' },
+      '독서가치와 목적인식': { desc: '독서가 왜 중요한지, 무엇을 위해 읽는지 아는 마음', tip: '"이 책에서 어떤 부분이 좋았어?" 같은 질문으로 스스로 독서의 의미를 발견하도록 도와주세요.' },
+      '독서노력과 마음가짐': { desc: '꾸준히 노력하면 독서 능력이 좋아진다고 믿는 마음', tip: '결과보다 "오늘도 책을 펼쳤다"는 과정 자체를 인정하고 격려해주세요.' },
+    };
+    const CATEGORY_TIP = {
+      '어휘': { desc: '새로운 낱말을 알아가고 활용하는 힘', tip: '모르는 단어가 나오면 바로 알려주기보다 "무슨 뜻일 것 같아?"라고 먼저 물어봐주세요.' },
+      '사실': { desc: '글에 드러난 내용을 정확히 파악하는 힘', tip: '육하원칙 질문("누가, 언제, 어디서, 무엇을")으로 내용을 함께 되짚는 활동을 해보세요.' },
+      '추론': { desc: '글에 직접 나오지 않은 숨은 뜻을 짐작하는 힘', tip: '"왜 그랬을까?" 같은 열린 질문을 던지고 이유를 한 번 더 물어봐주세요.' },
+      '비판': { desc: '내 생각과 책 속 생각을 비교하고 판단하는 힘', tip: '"너라면 어떻게 했을 것 같아?"처럼 자신의 의견을 묻는 대화를 자주 나눠주세요.' },
+      '창의': { desc: '읽은 내용을 생활·경험에 연결해 새롭게 표현하는 힘', tip: '그리기, 역할극, 뒷이야기 상상 등 다양한 독후 표현 활동을 함께 해보세요.' },
+      '주제통합': { desc: '같은 주제의 여러 책을 비교하며 통합적으로 이해하는 힘', tip: '같은 주제의 책 2~3권을 함께 대출해 비교하며 읽는 활동을 제안해보세요.' },
+    };
+
+    function computeGroupAverages(labelFn, keyFn) {
+      const groups = {};
+      ROSTER.roster.forEach(s => {
+        const k = keyFn(s);
+        if (!groups[k]) groups[k] = { key: k, label: labelFn(s), students: [] };
+        groups[k].students.push(s);
+      });
+      return Object.values(groups)
+        .sort((a, b) => a.key > b.key ? 1 : -1)
+        .map(g => ({
+          label: g.label,
+          count: g.students.length,
+          areaAvg: ROSTER.areaLabels.map((_, i) => average(g.students.map(s => s.area[i]))),
+          categoryAvg: ROSTER.categoryLabels.map((_, i) => average(g.students.map(s => s.category[i]))),
+        }));
+    }
+
+    function analyzeGroupGaps(group) {
+      function ranked(labels, groupVals, overallVals) {
+        return labels.map((label, i) => ({
+          label, score: groupVals[i], overall: overallVals[i],
+          gap: (groupVals[i] == null || overallVals[i] == null) ? 0 : groupVals[i] - overallVals[i],
+        })).filter(r => r.score != null).sort((a, b) => a.gap - b.gap);
+      }
+      const areaRanked = ranked(ROSTER.areaLabels, group.areaAvg, ROSTER.overallArea);
+      const catRanked = ranked(ROSTER.categoryLabels, group.categoryAvg, ROSTER.overallCategory);
+      return {
+        weakArea: areaRanked[0], strongArea: areaRanked[areaRanked.length - 1],
+        weakCat: catRanked[0], strongCat: catRanked[catRanked.length - 1],
+      };
+    }
+
+    function groupCardHTML(group) {
+      const g = analyzeGroupGaps(group);
+      const areaTip = AREA_TIP[g.weakArea.label] || { tip: '' };
+      const catTip = CATEGORY_TIP[g.weakCat.label] || { tip: '' };
+      const cardId = 'grp_' + Math.random().toString(36).slice(2, 9);
+      setTimeout(function () {
+        buildRadar(document.getElementById(cardId + '_a'), ROSTER.areaLabels, group.areaAvg, SCALE_MIN, SCALE_MAX, ROSTER.overallArea, 220);
+        buildRadar(document.getElementById(cardId + '_c'), ROSTER.categoryLabels, group.categoryAvg, SCALE_MIN, SCALE_MAX, ROSTER.overallCategory, 220);
+      }, 0);
+      const countLabel = group.count == null ? '개인 점수 · 전체 평균과 비교' : group.count + '명';
+      return '' +
+        '<div class="group-card">' +
+          '<div class="group-head"><span class="group-title">' + group.label + '</span><span class="group-count">' + countLabel + '</span></div>' +
+          '<div class="group-mini-charts">' +
+            '<div><div class="mini-chart-title">대영역</div><div id="' + cardId + '_a"></div></div>' +
+            '<div><div class="mini-chart-title">하위영역</div><div id="' + cardId + '_c"></div></div>' +
+          '</div>' +
+          '<div class="group-feedback">' +
+            '<p class="fb-line"><span class="pill warn">보완 필요</span><strong>' + g.weakArea.label + '</strong> (전체 평균 대비 ' + gapText(g.weakArea.gap) + ') · <strong>' + g.weakCat.label + '</strong> (' + gapText(g.weakCat.gap) + ')<br><span class="tip">→ ' + (areaTip.tip || catTip.tip) + '</span></p>' +
+            '<p class="fb-line"><span class="pill good">강점</span><strong>' + g.strongArea.label + '</strong> (' + gapText(g.strongArea.gap) + ') · <strong>' + g.strongCat.label + '</strong> (' + gapText(g.strongCat.gap) + ')</p>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function renderGroupSection(containerId, labelFn, keyFn) {
+      const container = document.getElementById(containerId);
+      const groups = computeGroupAverages(labelFn, keyFn);
+      if (!groups.length) { container.innerHTML = '<div class="empty-hint">표시할 데이터가 없습니다.</div>'; return; }
+      container.innerHTML = groups.map(groupCardHTML).join('');
+    }
+
+    // ---- 방사형(레이더) 차트: 순수 SVG로 그림 ----
+    // seriesB를 주면 2계열(비교) 차트, 생략하면 1계열(전체 평균만) 차트가 된다.
+    function buildRadar(container, labels, seriesA, min, max, seriesB, size) {
+      container.innerHTML = '';
+      size = size || 300;
+      const cx = size / 2, cy = size / 2, r = size / 2 - 42;
+      const n = labels.length;
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+      svg.setAttribute('width', '100%');
+      svg.style.overflow = 'visible';
+
+      function point(i, value) {
+        const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+        const ratio = Math.max(0, Math.min(1, (value - min) / (max - min)));
+        const rad = r * ratio;
+        return [cx + rad * Math.cos(angle), cy + rad * Math.sin(angle)];
+      }
+
+      const rings = 4;
+      for (let ring = 1; ring <= rings; ring++) {
+        const ratio = ring / rings, pts = [];
+        for (let i = 0; i < n; i++) {
+          const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+          pts.push((cx + r * ratio * Math.cos(angle)) + ',' + (cy + r * ratio * Math.sin(angle)));
+        }
+        const poly = document.createElementNS(svgNS, 'polygon');
+        poly.setAttribute('points', pts.join(' '));
+        poly.setAttribute('class', 'grid-line');
+        svg.appendChild(poly);
+      }
+
+      for (let i = 0; i < n; i++) {
+        const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+        const x2 = cx + r * Math.cos(angle), y2 = cy + r * Math.sin(angle);
+        const line = document.createElementNS(svgNS, 'line');
+        line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+        line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+        line.setAttribute('class', 'axis-line');
+        svg.appendChild(line);
+
+        const lx = cx + (r + 20) * Math.cos(angle), ly = cy + (r + 20) * Math.sin(angle);
+        const text = document.createElementNS(svgNS, 'text');
+        text.setAttribute('x', lx); text.setAttribute('y', ly);
+        text.setAttribute('text-anchor', Math.abs(Math.cos(angle)) < 0.15 ? 'middle' : (Math.cos(angle) > 0 ? 'start' : 'end'));
+        text.setAttribute('dominant-baseline', 'middle');
+        text.setAttribute('class', 'axis-label');
+        text.textContent = labels[i];
+        svg.appendChild(text);
+      }
+
+      function drawSeries(values, colorVar, opacity) {
+        const pts = values.map((v, i) => point(i, v == null ? min : v));
+        const poly = document.createElementNS(svgNS, 'polygon');
+        poly.setAttribute('points', pts.map(p => p.join(',')).join(' '));
+        poly.setAttribute('fill', css(colorVar));
+        poly.setAttribute('fill-opacity', opacity);
+        poly.setAttribute('stroke', css(colorVar));
+        poly.setAttribute('stroke-width', '2');
+        svg.appendChild(poly);
+        pts.forEach((p, i) => {
+          const c = document.createElementNS(svgNS, 'circle');
+          c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('r', 3.5);
+          c.setAttribute('fill', css(colorVar));
+          const title = document.createElementNS(svgNS, 'title');
+          title.textContent = labels[i] + ': ' + (values[i] == null ? '-' : values[i].toFixed(1));
+          c.appendChild(title);
+          svg.appendChild(c);
+        });
+      }
+
+      if (seriesB) drawSeries(seriesB, '--status-good', 0.10);
+      drawSeries(seriesA, '--accent', 0.18);
+
+      container.appendChild(svg);
+    }
+
+    function enter() {
+      const passcode = document.getElementById('in-passcode').value;
+      const msg = document.getElementById('gate-msg');
+      msg.textContent = '';
+      document.getElementById('btn-enter').disabled = true;
+      google.script.run
+        .withSuccessHandler(function (res) {
+          document.getElementById('btn-enter').disabled = false;
+          if (!res.ok) { msg.textContent = '암호가 올바르지 않습니다.'; return; }
+          ROSTER = res;
+          document.getElementById('gate-view').classList.add('hidden');
+          document.getElementById('dash-view').classList.remove('hidden');
+          renderDashboard();
+        })
+        .withFailureHandler(function (err) {
+          document.getElementById('btn-enter').disabled = false;
+          msg.textContent = '오류: ' + err.message;
+        })
+        .getAdminRoster(passcode);
+    }
+
+    function renderBarList(containerId, labels, values) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = labels.map((label, i) => {
+        const v = values[i];
+        const pct = v == null ? 0 : Math.max(0, Math.min(100, ((v - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100));
+        return '<div class="bar-row"><span>' + label + '</span><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div><span class="bar-value">' + fmt(v) + '</span></div>';
+      }).join('');
+    }
+
+    function weakestOf(labels, values) {
+      let idx = -1, min = Infinity;
+      values.forEach((v, i) => { if (v != null && v < min) { min = v; idx = i; } });
+      return idx === -1 ? '-' : labels[idx] + ' (' + fmt(min) + '점)';
+    }
+
+    // 응답 시트에 "4"만 저장돼 있든 "4학년"으로 저장돼 있든 라벨을 중복 없이 만든다.
+    function gradeLabel(g) { const s = String(g == null ? '' : g).trim(); return /학년\s*$/.test(s) ? s : s + '학년'; }
+    function clsLabel(c) { const s = String(c == null ? '' : c).trim(); return /반\s*$/.test(s) ? s : s + '반'; }
+
+    function renderDashboard() {
+      document.getElementById('stat-count').textContent = ROSTER.count + '명';
+      document.getElementById('stat-weak-area').textContent = weakestOf(ROSTER.areaLabels, ROSTER.overallArea);
+      document.getElementById('stat-weak-cat').textContent = weakestOf(ROSTER.categoryLabels, ROSTER.overallCategory);
+      buildRadar(document.getElementById('chart-area'), ROSTER.areaLabels, ROSTER.overallArea, SCALE_MIN, SCALE_MAX);
+      buildRadar(document.getElementById('chart-category'), ROSTER.categoryLabels, ROSTER.overallCategory, SCALE_MIN, SCALE_MAX);
+      populateStudentPicker();
+      renderGroupSection('groups-grade', s => gradeLabel(s.grade), s => s.grade);
+      renderGroupSection('groups-class', s => gradeLabel(s.grade) + ' ' + clsLabel(s.cls), s => s.grade + '|' + s.cls);
+      renderBarList('bar-area', ROSTER.areaLabels, ROSTER.overallArea);
+      renderBarList('bar-category', ROSTER.categoryLabels, ROSTER.overallCategory);
+      renderTable();
+    }
+
+    // ---------- 학생 개별 조회 (드롭다운으로 선택 → 바로 아래에 출력) ----------
+    function populateStudentPicker() {
+      const picker = document.getElementById('student-picker');
+      const options = ROSTER.roster.map((s, i) =>
+        '<option value="' + i + '">' + gradeLabel(s.grade) + ' ' + clsLabel(s.cls) + ' ' + s.number + '번</option>'
+      ).join('');
+      picker.innerHTML = '<option value="">학생을 선택하세요</option>' + options;
+    }
+
+    function renderStudentPickerOutput() {
+      const idx = document.getElementById('student-picker').value;
+      const output = document.getElementById('student-picker-output');
+      if (idx === '') { output.innerHTML = ''; return; }
+      const s = ROSTER.roster[Number(idx)];
+      output.innerHTML = groupCardHTML({
+        label: gradeLabel(s.grade) + ' ' + clsLabel(s.cls) + ' ' + s.number + '번',
+        count: null, // 개인 조회이므로 "N명" 대신 안내 문구를 보여줌 (groupCardHTML에서 처리)
+        areaAvg: s.area, categoryAvg: s.category,
+      });
+    }
+
+    function tableColumns() {
+      return ['학년', '반', '번호']
+        .concat(ROSTER.areaLabels)
+        .concat(ROSTER.categoryLabels)
+        .concat(['관찰 필요', '']);
+    }
+
+    function rowValues(s) {
+      return [s.grade, s.cls, s.number].concat(s.area).concat(s.category).concat([s.weakestCat || '-']);
+    }
+
+    function renderTable() {
+      const head = document.getElementById('roster-head');
+      const cols = tableColumns();
+      head.innerHTML = cols.map((c, i) => '<th data-col="' + i + '" class="' + (i === sortState.col ? 'sorted ' + (sortState.dir > 0 ? 'asc' : '') : '') + '">' + c + '</th>').join('');
+
+      const rows = ROSTER.roster.slice();
+      rows.sort((a, b) => {
+        const va = rowValues(a)[sortState.col], vb = rowValues(b)[sortState.col];
+        if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * sortState.dir;
+        return String(va).localeCompare(String(vb)) * sortState.dir;
+      });
+
+      document.getElementById('roster-body').innerHTML = rows.map(s => {
+        const cells = [s.grade, s.cls, s.number]
+          .map(v => '<td>' + v + '</td>').join('') +
+          s.area.map(v => '<td>' + fmt(v) + '</td>').join('') +
+          s.category.map(v => '<td>' + fmt(v) + '</td>').join('') +
+          '<td>' + (s.weakestCat ? '<span class="pill-warn">' + s.weakestCat + '</span>' : '-') + '</td>' +
+          '<td><a class="view-link" href="' + STUDENT_APP_URL + '?grade=' + encodeURIComponent(s.grade) + '&cls=' + encodeURIComponent(s.cls) + '&number=' + encodeURIComponent(s.number) + '" target="_top">보기 →</a></td>';
+        return '<tr>' + cells + '</tr>';
+      }).join('');
+    }
+
+    function exportCSV() {
+      const cols = tableColumns().slice(0, -1); // "보기" 링크 열 제외
+      const lines = [cols.join(',')];
+      ROSTER.roster.forEach(s => {
+        const vals = rowValues(s).map(v => (typeof v === 'string' && v.indexOf(',') !== -1) ? '"' + v + '"' : (typeof v === 'number' ? v.toFixed(1) : v));
+        lines.push(vals.join(','));
+      });
+      const csv = '﻿' + lines.join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '독서진단_전체명단.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('btn-enter').addEventListener('click', enter);
+    document.getElementById('in-passcode').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+    document.getElementById('btn-export').addEventListener('click', exportCSV);
+    document.getElementById('student-picker').addEventListener('change', renderStudentPickerOutput);
+    document.getElementById('roster-head').addEventListener('click', function (e) {
+      const th = e.target.closest('th');
+      if (!th) return;
+      const col = Number(th.dataset.col);
+      sortState.dir = (sortState.col === col) ? -sortState.dir : 1;
+      sortState.col = col;
+      renderTable();
+    });
+  </script>
+</body>
+</html>

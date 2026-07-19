@@ -1,0 +1,907 @@
+<title>독서 진단 리포트</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --page:            #f9f9f7;
+    --surface-1:       #fcfcfb;
+    --surface-2:       #f2f1ed;
+    --text-primary:    #0b0b0b;
+    --text-secondary:  #52514e;
+    --text-muted:      #898781;
+    --grid:            #e1e0d9;
+    --axis:            #c3c2b7;
+    --border:          rgba(11,11,11,0.10);
+    --accent:          #2a78d6;
+    --accent-ink:      #ffffff;
+    --series-student:  #2a78d6;
+    --series-avg:      #008300;
+    --critical:        #d03b3b;
+    --status-good:     #0ca30c;
+    --status-good-bg:  rgba(12,163,12,0.10);
+    --status-warn:     #c98500;
+    --status-warn-bg:  rgba(250,178,25,0.16);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --page:            #0d0d0d;
+      --surface-1:       #1a1a19;
+      --surface-2:       #232322;
+      --text-primary:    #ffffff;
+      --text-secondary:  #c3c2b7;
+      --text-muted:      #898781;
+      --grid:            #2c2c2a;
+      --axis:            #383835;
+      --border:          rgba(255,255,255,0.10);
+      --accent:          #3987e5;
+      --series-student:  #3987e5;
+      --series-avg:      #008300;
+      --critical:        #e66767;
+      --status-good:     #0ca30c;
+      --status-good-bg:  rgba(12,163,12,0.16);
+      --status-warn:     #fab219;
+      --status-warn-bg:  rgba(250,178,25,0.14);
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --page:            #0d0d0d;
+    --surface-1:       #1a1a19;
+    --surface-2:       #232322;
+    --text-primary:    #ffffff;
+    --text-secondary:  #c3c2b7;
+    --text-muted:      #898781;
+    --grid:            #2c2c2a;
+    --axis:            #383835;
+    --border:          rgba(255,255,255,0.10);
+    --accent:          #3987e5;
+    --series-student:  #3987e5;
+    --status-good:     #0ca30c;
+    --status-good-bg:  rgba(12,163,12,0.16);
+    --status-warn:     #fab219;
+    --status-warn-bg:  rgba(250,178,25,0.14);
+    --series-avg:      #008300;
+    --critical:        #e66767;
+  }
+
+  .viz-root {
+    font-family: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 28px 16px 64px;
+  }
+  .viz-root * { box-sizing: border-box; }
+  .wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  header.page-head h1 { font-size: 27px; font-weight: 700; margin: 0 0 6px; text-wrap: balance; }
+  header.page-head p { margin: 0; color: var(--text-secondary); font-size: 16px; line-height: 1.65; max-width: 66ch; }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+  .card h2 { font-size: 15.5px; font-weight: 700; margin: 0 0 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+
+  .upload-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .file-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 18px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text-primary); font-size: 16px; font-weight: 600;
+    cursor: pointer;
+  }
+  .file-btn input { display: none; }
+  .file-status { font-size: 15px; color: var(--text-secondary); }
+  .file-status.error { color: var(--critical); }
+  .hint { font-size: 13.5px; color: var(--text-muted); margin-top: 10px; line-height: 1.6; }
+
+  .select-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  select {
+    padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text-primary); font-size: 16px; min-width: 170px;
+  }
+  .summary-pill {
+    font-size: 13.5px; color: var(--text-secondary); background: var(--surface-2);
+    border-radius: 999px; padding: 5px 12px; border: 1px solid var(--border);
+  }
+
+  .section-head-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .section-head-row h2 { margin: 0; }
+
+  .segmented { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 3px; gap: 2px; }
+  .segmented button {
+    background: transparent; border: none; padding: 7px 14px; border-radius: 6px;
+    font-size: 14px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+  }
+  .segmented button.active { background: var(--surface-1); color: var(--text-primary); box-shadow: 0 1px 2px var(--border); }
+
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .charts-grid { grid-template-columns: 1fr; } }
+  .chart-card { display: flex; flex-direction: column; align-items: center; }
+  .chart-card .chart-title { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+  .chart-card .chart-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .legend { display: flex; gap: 18px; font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 11px; height: 11px; border-radius: 2px; }
+
+  .delta-strip { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 12px; max-width: 340px; }
+  .delta-chip {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600;
+    border-radius: 999px; padding: 4px 10px 4px 6px; border: 1px solid var(--border);
+  }
+  .delta-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .delta-chip.up { color: var(--status-good); background: var(--status-good-bg); }
+  .delta-chip.up .dot { background: var(--status-good); }
+  .delta-chip.down { color: var(--status-warn); background: var(--status-warn-bg); }
+  .delta-chip.down .dot { background: var(--status-warn); }
+  .delta-chip.flat { color: var(--text-muted); background: var(--surface-2); }
+  .delta-chip.flat .dot { background: var(--text-muted); }
+
+  .tabs { display: flex; gap: 8px; margin: 22px 0 14px; border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    background: transparent; border: none; border-bottom: 2px solid transparent;
+    padding: 10px 4px; margin-bottom: -1px; font-size: 16px; font-weight: 700;
+    color: var(--text-muted); cursor: pointer;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .narrative-intro { font-size: 15.5px; line-height: 1.75; color: var(--text-secondary); margin: 0 0 16px; }
+  .narrative-summary { font-size: 15.5px; line-height: 1.7; margin: 0 0 16px; padding: 12px 16px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); }
+  .narrative-summary strong { color: var(--text-primary); }
+  .point-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 640px) { .point-grid { grid-template-columns: 1fr; } }
+  .point-card { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; background: var(--surface-2); }
+  .point-card .pill {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700;
+    border-radius: 999px; padding: 4px 11px; margin-bottom: 9px;
+  }
+  .pill.good { color: var(--status-good); background: var(--status-good-bg); }
+  .pill.warn { color: var(--status-warn); background: var(--status-warn-bg); }
+  .point-card .point-title { font-size: 16px; font-weight: 700; margin: 0 0 5px; }
+  .point-card .point-desc { font-size: 13.5px; color: var(--text-muted); margin: 0 0 9px; line-height: 1.55; }
+  .point-card .point-tip { font-size: 15px; color: var(--text-primary); line-height: 1.65; margin: 0; }
+  .point-card .point-mission { font-size: 14px; color: var(--text-primary); line-height: 1.6; margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed var(--border); }
+  .point-card .point-mission strong { color: var(--accent); }
+  .point-card .point-score { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; font-variant-numeric: tabular-nums; }
+
+  .closing-note {
+    margin-top: 16px; padding: 16px 18px; border-radius: 10px;
+    background: var(--status-good-bg); border: 1px solid var(--border); font-size: 15px; line-height: 1.75;
+  }
+  .home-guide { margin-top: 16px; }
+  .home-guide h3 { font-size: 14.5px; margin: 0 0 8px; color: var(--text-secondary); }
+  .home-guide ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 9px; }
+  .home-guide li { font-size: 15px; line-height: 1.65; }
+
+  .axis-label { font-size: 12.5px; fill: var(--text-secondary); }
+  .grid-line { stroke: var(--grid); fill: none; }
+  .axis-line { stroke: var(--axis); }
+
+  .table-toggle { text-align: center; }
+  .ghost-btn {
+    background: transparent; border: 1px solid var(--accent); color: var(--accent);
+    padding: 9px 18px; border-radius: 8px; font-size: 14.5px; font-weight: 600; cursor: pointer;
+  }
+  .table-scroll { overflow-x: auto; margin-top: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; font-variant-numeric: normal; }
+  th { color: var(--text-secondary); font-weight: 600; font-size: 13.5px; }
+  td.gap-up { color: var(--status-good); font-weight: 600; }
+  td.gap-down { color: var(--status-warn); font-weight: 600; }
+
+  .empty-state { text-align: center; color: var(--text-muted); font-size: 15px; padding: 32px 0; }
+  .hidden { display: none !important; }
+
+  .print-bar { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 26px; }
+  .print-bar .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .print-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 26px; font-size: 15.5px; font-weight: 700;
+    border-radius: 10px; border: none; cursor: pointer;
+  }
+  .print-btn.primary { background: var(--accent); color: #fff; }
+  .print-btn.secondary { background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border); }
+  .print-hint { font-size: 12.5px; color: var(--text-muted); text-align: center; max-width: 46ch; line-height: 1.6; }
+  .print-only { display: none; }
+
+  button:focus-visible, select:focus-visible, .file-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: #fff; }
+    .viz-root { background: #fff; padding: 0; min-height: 0; }
+    .viz-root, :root[data-theme="dark"] .viz-root {
+      --page: #ffffff; --surface-1: #ffffff; --surface-2: #f5f5f3;
+      --text-primary: #0b0b0b; --text-secondary: #3a3a38; --text-muted: #66655f;
+      --border: rgba(11,11,11,0.14); color-scheme: light;
+    }
+    .card { border: none; border-radius: 0; padding: 0; box-shadow: none; }
+    .wrap { gap: 10px; }
+    #upload-section, #select-section, .print-bar, .table-toggle { display: none !important; }
+    header.page-head, #empty-state { display: none; }
+    .print-only { display: block; }
+    .point-card, .chart-card, .narrative-summary, .closing-note { break-inside: avoid; }
+    .charts-grid { break-inside: avoid; }
+    #table-scroll { display: block !important; margin-top: 18px; }
+    .tabs { display: none !important; }
+    a[href]::after { content: ""; }
+  }
+</style>
+
+<div class="viz-root">
+  <div class="wrap">
+    <header class="page-head">
+      <h1>독서 진단 리포트</h1>
+      <p>구글 설문지 응답 스프레드시트를 CSV로 내보낸 파일을 올리면, 학생 개인 점수를 학급·학년 평균과 비교한 방사형 그래프 2종(5개 대영역 / 6개 하위영역)을 바로 보여줍니다. 학생용 탭은 다정한 격려와 방학·2학기 실천 제안을, 학부모용 탭은 가정 연계 지도 방법을 안내합니다. 파일은 이 브라우저 안에서만 처리되며 서버로 전송되지 않습니다.</p>
+    </header>
+
+    <section id="upload-section" class="card">
+      <h2>1. 응답 파일 업로드</h2>
+      <div class="upload-row">
+        <label class="file-btn">
+          CSV 파일 선택
+          <input id="file-input" type="file" accept=".csv,text/csv">
+        </label>
+        <span id="file-status" class="file-status">선택된 파일 없음</span>
+      </div>
+      <div class="hint">Google Sheets 응답 시트에서 <strong>파일 &gt; 다운로드 &gt; 쉼표로 구분된 값(.csv)</strong>으로 내보낸 파일을 그대로 올리면 됩니다. 첫 행은 설문 문항(헤더), 이후 행은 학생 응답이어야 합니다.</div>
+    </section>
+
+    <section id="select-section" class="card hidden">
+      <div class="section-head-row">
+        <h2>2. 학생 선택 · 비교 기준</h2>
+      </div>
+      <div class="select-row">
+        <select id="student-select"></select>
+        <span id="summary-pill" class="summary-pill"></span>
+      </div>
+      <div class="select-row" style="margin-top:12px;">
+        <span style="font-size:14px; color:var(--text-secondary);">비교 대상</span>
+        <div class="segmented" id="scope-toggle">
+          <button data-scope="all" class="active">전체 평균</button>
+          <button data-scope="grade">같은 학년 평균</button>
+          <button data-scope="class">같은 반 평균</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="result-section" class="card hidden">
+      <div id="print-header" class="print-only" style="margin-bottom:18px;">
+        <div style="font-size:20px; font-weight:800;">독서 진단 리포트</div>
+        <div id="print-subline" style="font-size:14px; color:var(--text-secondary); margin-top:4px;"></div>
+      </div>
+
+      <h2>3. 진단 그래프</h2>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">① 5개 대영역</div>
+          <div class="chart-sub">독서흥미·주도성/소통·자신감·가치인식·노력</div>
+          <div id="chart-area"></div>
+          <div id="delta-area" class="delta-strip"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">② 6개 하위영역</div>
+          <div class="chart-sub">어휘·사실·추론·비판·창의·주제통합</div>
+          <div id="chart-category"></div>
+          <div id="delta-category" class="delta-strip"></div>
+        </div>
+      </div>
+      <div class="legend" style="justify-content:center;">
+        <span><span class="swatch" style="background:var(--series-student)"></span>선택한 학생</span>
+        <span id="avg-legend-label"><span class="swatch" style="background:var(--series-avg)"></span>전체 평균</span>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="student">학생용 리포트</button>
+        <button class="tab-btn" data-tab="parent">학부모용 리포트</button>
+      </div>
+      <div id="narrative-panel"></div>
+
+      <div class="table-toggle" style="margin-top:16px;">
+        <button id="btn-toggle-table" class="ghost-btn">표로 보기</button>
+      </div>
+      <div id="table-scroll" class="table-scroll hidden">
+        <table id="table-view"></table>
+      </div>
+
+      <div class="print-bar">
+        <div class="btn-row">
+          <button id="btn-download-report" class="print-btn primary">⬇️ 인쇄용 파일 다운로드</button>
+          <button id="btn-print" class="print-btn secondary">🖨️ 지금 화면에서 바로 인쇄 시도</button>
+        </div>
+        <div class="print-hint">이 화면은 인쇄가 제한된 미리보기 화면이라 <strong>"인쇄용 파일 다운로드"</strong>를 눌러 받은 파일을 열어야 확실하게 인쇄/PDF 저장이 됩니다. 파일 이름은 학년·반·번호로 자동 채워집니다. 다운로드한 파일을 더블클릭해서 열면 그 안에 인쇄 버튼이 또 있어요 (또는 Cmd/Ctrl+P).</div>
+      </div>
+    </section>
+
+    <div id="empty-state" class="empty-state">CSV 파일을 올리면 이곳에 결과가 표시됩니다.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const SCALE_MIN = 1, SCALE_MAX = 5;
+
+  const QUESTION_MAP = [
+    { area: 'Ⅰ', areaLabel: '독서흥미와 몰입', category: '어휘', text: '책을 읽을 때 새로운 단어를 알아가는 것이 즐겁다.' },
+    { area: 'Ⅰ', areaLabel: '독서흥미와 몰입', category: '사실', text: '책을 읽을 때 내용을 꼼꼼히 읽으려고 노력하는 것이 즐겁다.' },
+    { area: 'Ⅰ', areaLabel: '독서흥미와 몰입', category: '추론', text: '책에서 단서를 찾아 문제를 해결하거나, 깊은 뜻을 상상하며 읽는 것이 즐겁다.' },
+    { area: 'Ⅰ', areaLabel: '독서흥미와 몰입', category: '비판', text: '책의 내용이나 생각이 나와 맞는지 비교할 때 집중할 수 있고 즐겁다.' },
+    { area: 'Ⅰ', areaLabel: '독서흥미와 몰입', category: '창의', text: '책에서 본 내용을 내 생활이나 경험에 연결해 보는 것이 즐겁다.' },
+    { area: 'Ⅰ', areaLabel: '독서흥미와 몰입', category: '주제통합', text: '같은 주제의 여러 책을 비교하며 선택하여 읽는 것이 즐겁다.' },
+
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '어휘', text: '책에 모르는 단어가 있을 때 알아내려고 노력한다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '사실', text: '책의 내용을 잘 이해하고 기억하려고 중요한 내용을 스스로 메모하며 읽기도 한다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '추론', text: '책을 읽는 방법이나 순서를 내가 원하는 대로 정해서 읽기도 한다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '비판', text: '책을 읽을 때 글쓴이의 생각이 맞는지 스스로 질문을 던지며 읽기도 한다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '창의', text: '책을 읽은 후 어떤 활동을 할지 스스로 정하여 실천하기도 한다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '주제통합', text: '같은 주제의 여러 책을 스스로 찾아 비교하며 선택하여 읽기도 한다.' },
+
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '어휘', text: '책에 모르는 단어가 있을 때 친구나 어른에게 물어보는 것이 좋다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '사실', text: '책에 있는 내용을 잘 이해하거나 기억하려고 친구나 어른들과 이야기하는 것이 좋다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '추론', text: '책 속에 숨어있는 깊은 뜻에 대해 친구나 어른들과 이야기하는 것이 좋다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '비판', text: '책을 읽고 서로 다른 생각에 대해 비교하며 친구나 어른들과 이야기하는 것이 좋다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '창의', text: '책을 읽고 새롭게 생각해 본 것을 친구나 어른들과 이야기하는 것이 좋다.' },
+    { area: 'Ⅱ', areaLabel: '독서주도성과 소통', category: '주제통합', text: '같은 주제의 여러 책을 비교하며 선택하여 읽는 것을 친구나 어른들과 이야기하는 것이 좋다.' },
+
+    { area: 'Ⅲ', areaLabel: '독서자신감', category: '어휘', text: '책을 읽을 때 어려운 단어가 나와도 잘 읽을 수 있다.' },
+    { area: 'Ⅲ', areaLabel: '독서자신감', category: '사실', text: '책을 읽을 때 책에 있는 핵심 내용을 잘 파악할 수 있다.' },
+    { area: 'Ⅲ', areaLabel: '독서자신감', category: '추론', text: '책에 직접 나오지 않아도 책 속에 숨어있는 뜻을 알아낼 수 있다.' },
+    { area: 'Ⅲ', areaLabel: '독서자신감', category: '비판', text: '책을 읽고 내 생각과 글쓴이의 생각을 비교하여 말할 자신이 있다.' },
+    { area: 'Ⅲ', areaLabel: '독서자신감', category: '창의', text: '책을 읽고 이해하고 생각한 것을 내 생활이나 경험에 연결해 실천할 수 있다.' },
+    { area: 'Ⅲ', areaLabel: '독서자신감', category: '주제통합', text: '같은 주제의 여러 책을 비교하며 선택하여 읽고 공통점과 차이점을 설명할 자신이 있다.' },
+
+    { area: 'Ⅳ', areaLabel: '독서가치와 목적인식', category: '어휘', text: '책을 읽고 어려운 단어를 더 많이 알아가는 것은 중요하다.' },
+    { area: 'Ⅳ', areaLabel: '독서가치와 목적인식', category: '사실', text: '책 속에 있는 내용을 정확하게 이해하는 것은 중요하다.' },
+    { area: 'Ⅳ', areaLabel: '독서가치와 목적인식', category: '추론', text: '책의 깊은 뜻까지 생각해 보는 것은 중요하다.' },
+    { area: 'Ⅳ', areaLabel: '독서가치와 목적인식', category: '비판', text: '책을 읽을 때 나만의 생각과 기준을 가진 독자가 되는 것은 중요하다.' },
+    { area: 'Ⅳ', areaLabel: '독서가치와 목적인식', category: '창의', text: '책을 읽고 나서 창의적으로 다양한 활동을 해내는 것은 중요하다.' },
+    { area: 'Ⅳ', areaLabel: '독서가치와 목적인식', category: '주제통합', text: '같은 주제의 여러 책을 비교하며 선택하여 읽고 나만의 생각을 정리하는 것은 중요하다.' },
+
+    { area: 'Ⅴ', areaLabel: '독서노력과 마음가짐', category: '어휘', text: '책을 열심히 읽으면 어휘력이 점점 좋아진다.' },
+    { area: 'Ⅴ', areaLabel: '독서노력과 마음가짐', category: '사실', text: '책을 열심히 읽으면 내용을 정확히 파악할 수 있는 능력이 좋아진다.' },
+    { area: 'Ⅴ', areaLabel: '독서노력과 마음가짐', category: '추론', text: '책을 열심히 읽으면 책 속에 적혀 있지 않은 내용까지 생각할 수 있는 능력이 좋아진다.' },
+    { area: 'Ⅴ', areaLabel: '독서노력과 마음가짐', category: '비판', text: '책을 열심히 읽으면 다양한 생각을 엿보며 내 생각을 더 깊이 있게 정리하는 능력이 좋아진다.' },
+    { area: 'Ⅴ', areaLabel: '독서노력과 마음가짐', category: '창의', text: '책을 읽고 나서 다양한 활동을 열심히 해내면 창의력이 점점 좋아진다.' },
+    { area: 'Ⅴ', areaLabel: '독서노력과 마음가짐', category: '주제통합', text: '같은 주제의 여러 책을 비교하며 선택하여 읽으면 여러 가지 내용을 종합하는 능력이 좋아진다.' },
+  ];
+  const AREA_ORDER = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ'];
+  const CATEGORY_ORDER = ['어휘', '사실', '추론', '비판', '창의', '주제통합'];
+  const ID_HINTS = { grade: ['학년'], class: ['반'], number: ['번호', '학번', '출석번호', '순번', '번'] };
+
+  // ---------- 영역/하위영역별 안내 문구 (학생용 · 학부모용) ----------
+  const AREA_INFO = {
+    'Ⅰ': {
+      label: '독서흥미와 몰입', desc: '책을 읽는 순간 자체를 즐기고 몰입하는 힘이에요.',
+      student: '재미있어 보이는 책을 마음대로 골라 편하게 읽는 시간을 늘려보세요. 완독 부담 없이 그림이 많거나 좋아하는 주제의 책부터 시작해도 좋아요.',
+      parent: '완독이나 학습 목적을 강조하기보다 아이가 흥미를 느끼는 주제(만화, 그림책, 좋아하는 시리즈 등)부터 자유롭게 고르도록 허용해 주세요. 부모가 먼저 즐겁게 책을 읽는 모습을 보여주는 것도 큰 도움이 됩니다.',
+      studentMission: '이번 주: 표지만 보고 끌리는 책 1권을 골라 10쪽만 가볍게 읽어보기',
+      parentMission: '이번 주: 서점·도서관에서 아이가 표지만 보고 책 3권을 직접 골라보는 시간 30분 갖기',
+    },
+    'Ⅱ': {
+      label: '독서주도성과 소통', desc: '스스로 책을 고르고 읽는 힘, 그리고 읽은 내용을 다른 사람과 나누는 힘이에요.',
+      student: '이번엔 내가 직접 읽고 싶은 책을 골라보고, 다 읽은 후엔 가족이나 친구에게 어떤 이야기였는지 짧게 소개해보세요.',
+      parent: '서점이나 도서관에서 아이가 직접 책을 고르도록 기회를 주시고, 식사 시간 등에 "오늘 읽은 책 어땠어?"라고 자연스럽게 물어봐 주세요. 정답을 요구하지 않는 편안한 대화가 소통 능력을 키웁니다.',
+      studentMission: '이번 주: 내가 고른 책 1권을 다 읽고 가족에게 1분 동안 소개해보기',
+      parentMission: '이번 주: 저녁 식사 시간에 "오늘 읽은 책 한 줄 소개" 대화를 3번 나누기',
+    },
+    'Ⅲ': {
+      label: '독서자신감', desc: '책을 읽고 이해하는 나의 능력을 스스로 믿는 마음이에요.',
+      student: '어려운 책보다 내가 쉽게 읽을 수 있는 책으로 "나는 잘 읽을 수 있다"는 성공 경험을 쌓아보세요. 작은 성공이 모이면 자신감이 커져요.',
+      parent: '아이의 읽기 수준보다 약간 쉬운 책을 함께 골라 완독 성공 경험을 반복하게 해주세요. 결과보다 노력과 과정을 구체적으로 칭찬해 주시는 것이 자신감 형성에 효과적입니다.',
+      studentMission: '이번 주: 쉬운 책 1권을 끝까지 읽고 "나 완독했다!" 스티커 붙이기',
+      parentMission: '이번 주: 완독할 때마다 "어려운 부분도 포기 안 했네" 처럼 구체적으로 칭찬하는 말 3번 해주기',
+    },
+    'Ⅳ': {
+      label: '독서가치와 목적인식', desc: '나에게 독서가 왜 중요한지, 무엇을 위해 읽는지 아는 마음이에요.',
+      student: '책을 다 읽은 뒤 "이 책에서 무엇을 얻었지?", "왜 이 책이 나에게 도움이 될까?"를 한 문장으로 적어보는 습관을 가져보세요.',
+      parent: '독서를 성적이나 숙제와 연결짓기보다 "이 책에서 어떤 부분이 좋았어?", "너에게 어떤 도움이 됐어?" 같은 질문으로 아이 스스로 독서의 의미를 발견하도록 도와주세요.',
+      studentMission: '이번 주: 책을 다 읽고 "이 책에서 얻은 것 1가지"를 포스트잇에 적어 붙이기',
+      parentMission: '이번 주: "이 책에서 어떤 도움을 받았어?"라는 질문을 2번 던지기',
+    },
+    'Ⅴ': {
+      label: '독서노력과 마음가짐', desc: '꾸준히 노력하면 독서 능력이 좋아진다고 믿는, 성장하는 마음이에요.',
+      student: '매일 15분씩이라도 꾸준히 읽는 습관을 만들어보세요. 오늘 잘 안 되더라도 어제보다 한 줄 더 읽었다면 그것도 멋진 성장이에요.',
+      parent: '결과(다 읽었는지, 이해했는지)보다 "오늘도 책을 펼쳤다"는 과정 자체를 인정하고 격려해 주세요. 꾸준함에 대한 긍정적 피드백이 노력을 지속하는 큰 힘이 됩니다.',
+      studentMission: '이번 주: 하루 15분 독서 타이머를 맞추고 5일 도전해보기',
+      parentMission: '이번 주: 아이가 책을 펼친 날마다 달력에 함께 스티커 붙여주기',
+    },
+  };
+  const CATEGORY_INFO = {
+    '어휘': {
+      desc: '새로운 낱말을 알아가고 활용하는 힘이에요.',
+      student: '책을 읽다 모르는 단어가 나오면 표시해두고, 다 읽은 후 뜻을 찾아 나만의 단어장에 적어보세요.',
+      parent: '낯선 단어가 나오면 바로 뜻을 알려주기보다 "무슨 뜻일 것 같아?"라고 먼저 물어봐 주시고, 함께 사전을 찾아보는 활동을 추천합니다.',
+      studentMission: '이번 주: 모르는 단어 5개를 찾아 나만의 단어 카드 만들기',
+      parentMission: '이번 주: 단어 카드를 함께 만들며 뜻을 먼저 유추해보는 낱말 게임 1회 하기',
+    },
+    '사실': {
+      desc: '글에 드러난 내용을 정확히 파악하는 힘이에요.',
+      student: '책을 읽고 "누가, 언제, 어디서, 무엇을 했는지" 한두 문장으로 정리해보는 연습을 해보세요.',
+      parent: '책을 읽은 후 "주인공이 누구였어?", "무슨 일이 있었어?" 같은 육하원칙 질문으로 내용을 함께 되짚어봐 주세요.',
+      studentMission: '이번 주: 책 1권을 읽고 육하원칙으로 3줄 요약해보기',
+      parentMission: '이번 주: 책을 읽은 후 육하원칙 질문을 던지며 함께 내용을 정리해보기 1회',
+    },
+    '추론': {
+      desc: '글에 직접 나오지 않은 숨은 뜻을 짐작하는 힘이에요.',
+      student: '"왜 그랬을까?", "다음엔 어떻게 될까?"를 스스로 질문하며 읽어보세요. 정답이 없어도 괜찮아요, 상상하는 것 자체가 힘이 돼요.',
+      parent: '"주인공이 왜 그런 행동을 했을까?" 같은 열린 질문을 던지고, 아이의 답에 "그렇게 생각한 이유가 뭐야?"로 한 번 더 이어가 주세요.',
+      studentMission: '이번 주: "왜 그랬을까?" 질문을 노트에 3개 적어보기',
+      parentMission: '이번 주: 열린 질문 후 "왜 그렇게 생각했어?"라고 되묻는 대화 2번 나누기',
+    },
+    '비판': {
+      desc: '내 생각과 책 속 생각을 비교하고 판단하는 힘이에요.',
+      student: '책 속 인물의 생각에 동의하는지, 아니라면 나라면 어떻게 했을지 생각해보고 이야기해보세요.',
+      parent: '"너라면 어떻게 했을 것 같아?", "이 이야기에 동의해?"처럼 아이 자신의 의견을 묻고, 다르게 생각해도 존중해주는 대화를 나눠주세요.',
+      studentMission: '이번 주: 주인공에게 동의하는지 아닌지, 이유와 함께 말해보기',
+      parentMission: '이번 주: "너라면 어떻게 했을까?" 대화를 1번 나누기',
+    },
+    '창의': {
+      desc: '읽은 내용을 내 생활과 경험에 연결해 새롭게 표현하는 힘이에요.',
+      student: '책 내용을 그림으로 그리거나, 뒷이야기를 상상해서 나만의 이야기를 만들어보세요.',
+      parent: '독후 활동으로 그리기, 역할극, 뒷이야기 상상해서 말하기 등 다양한 표현 활동을 함께 시도해보시면 좋습니다.',
+      studentMission: '이번 주: 읽은 책의 뒷이야기를 그림이나 글로 만들어보기',
+      parentMission: '이번 주: 그리기·역할극 같은 독후 표현활동을 1회 함께 하기',
+    },
+    '주제통합': {
+      desc: '같은 주제의 여러 책을 비교하며 통합적으로 이해하는 힘이에요.',
+      student: '같은 주제(예: 동물, 우정)를 다룬 책을 2권 골라 비교하며 읽어보세요. 무엇이 비슷하고 무엇이 다른지 찾아보는 재미가 있어요.',
+      parent: '도서관에서 같은 주제의 책을 2~3권 함께 대출해 비교하며 읽는 활동을 제안해보세요. 공통점과 차이점을 이야기 나누면 통합적 사고력이 자랍니다.',
+      studentMission: '이번 주: 같은 주제 책 2권을 빌려서 비교하며 읽어보기',
+      parentMission: '이번 주: 도서관에서 같은 주제의 책 2~3권을 함께 대출하기',
+    },
+  };
+
+  // ---------- CSV 파싱 (따옴표로 감싼 콤마/줄바꿈 지원) ----------
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = false;
+        } else field += c;
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ',') { row.push(field); field = ''; }
+        else if (c === '\r') { /* skip */ }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+        else field += c;
+      }
+    }
+    if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+    return rows.filter(r => r.length > 1 || (r.length === 1 && r[0] !== ''));
+  }
+
+  function normalizeHeader(h) {
+    return String(h || '').replace(/^\s*\d+\.\s*/, '').replace(/\s+/g, ' ').trim();
+  }
+
+  function buildColumnMap(headers) {
+    const norm = headers.map(normalizeHeader);
+    const itemCol = {};
+    const unmatched = [];
+    QUESTION_MAP.forEach((q, i) => {
+      const target = normalizeHeader(q.text);
+      let col = norm.findIndex(h => h === target);
+      if (col === -1) col = norm.findIndex(h => h.indexOf(target) !== -1 || target.indexOf(h) !== -1);
+      if (col === -1) unmatched.push(i); else itemCol[i] = col;
+    });
+    const idCols = findIdColumns(headers);
+    if (unmatched.length) {
+      const used = new Set(Object.values(itemCol));
+      [idCols.grade, idCols.class, idCols.number].forEach(c => { if (c !== -1) used.add(c); });
+      const free = headers.map((_, i) => i).filter(i => i !== 0 && !used.has(i));
+      let cursor = 0;
+      unmatched.forEach(i => {
+        while (cursor < free.length && used.has(free[cursor])) cursor++;
+        if (cursor < free.length) { itemCol[i] = free[cursor]; used.add(free[cursor]); cursor++; }
+      });
+    }
+    return { itemCol, idCols };
+  }
+
+  function findIdColumns(headers) {
+    function find(hints) {
+      for (let i = 0; i < headers.length; i++) {
+        for (const h of hints) if (String(headers[i] || '').indexOf(h) !== -1) return i;
+      }
+      return -1;
+    }
+    return { grade: find(ID_HINTS.grade), class: find(ID_HINTS.class), number: find(ID_HINTS.number) };
+  }
+
+  function average(nums) {
+    const v = nums.filter(n => typeof n === 'number' && !isNaN(n));
+    if (!v.length) return null;
+    return v.reduce((a, b) => a + b, 0) / v.length;
+  }
+
+  function computeScoresForRow(row, itemCol) {
+    const values = QUESTION_MAP.map((q, i) => {
+      const col = itemCol[i];
+      if (col === undefined) return null;
+      const v = Number(row[col]);
+      return isNaN(v) ? null : v;
+    });
+    const areaScores = {}, categoryScores = {};
+    AREA_ORDER.forEach(a => {
+      const idxs = QUESTION_MAP.map((q, i) => q.area === a ? i : -1).filter(i => i !== -1);
+      areaScores[a] = average(idxs.map(i => values[i]));
+    });
+    CATEGORY_ORDER.forEach(c => {
+      const idxs = QUESTION_MAP.map((q, i) => q.category === c ? i : -1).filter(i => i !== -1);
+      categoryScores[c] = average(idxs.map(i => values[i]));
+    });
+    return { areaScores, categoryScores };
+  }
+
+  let DATA = null; // { students, overallArea, overallCategory }
+  let currentScope = 'all'; // 'all' | 'grade' | 'class'
+  let currentTab = 'student'; // 'student' | 'parent'
+  let currentStudent = null;
+  const ORIGINAL_TITLE = document.title;
+
+  const SCOPE_LABEL = { all: '전체 평균', grade: '같은 학년 평균', class: '같은 반 평균' };
+
+  function getComparisonAverages(scope, student) {
+    let pool = DATA.students;
+    if (scope === 'grade') pool = DATA.students.filter(s => s.grade === student.grade);
+    else if (scope === 'class') pool = DATA.students.filter(s => s.grade === student.grade && s.cls === student.cls);
+    if (pool.length < 2) pool = DATA.students; // 비교 대상이 너무 적으면 전체 평균으로 대체
+
+    const areaAvg = {}, categoryAvg = {};
+    AREA_ORDER.forEach(a => areaAvg[a] = average(pool.map(s => s.areaScores[a]).filter(v => v !== null)));
+    CATEGORY_ORDER.forEach(c => categoryAvg[c] = average(pool.map(s => s.categoryScores[c]).filter(v => v !== null)));
+    return { areaAvg, categoryAvg, poolSize: pool.length };
+  }
+
+  function processCSV(text) {
+    const rows = parseCSV(text);
+    if (rows.length < 2) throw new Error('데이터가 없는 파일입니다.');
+    const headers = rows[0];
+    const { itemCol, idCols } = buildColumnMap(headers);
+
+    const byKey = {};
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      const grade = idCols.grade !== -1 ? String(row[idCols.grade] || '').trim() : '';
+      const cls = idCols.class !== -1 ? String(row[idCols.class] || '').trim() : '';
+      const number = idCols.number !== -1 ? String(row[idCols.number] || '').trim() : '';
+      if (!grade && !cls && !number) continue;
+      const { areaScores, categoryScores } = computeScoresForRow(row, itemCol);
+      const key = grade + '-' + cls + '-' + number;
+      byKey[key] = { grade, cls, number, key, areaScores, categoryScores }; // 마지막 제출이 우선
+    }
+    const students = Object.values(byKey).sort((a, b) => a.key > b.key ? 1 : -1);
+    if (!students.length) throw new Error('학년/반/번호를 인식하지 못했습니다. 헤더에 "학년", "반", "번호" 문항이 있는지 확인해 주세요.');
+
+    const overallArea = {}, overallCategory = {};
+    AREA_ORDER.forEach(a => overallArea[a] = average(students.map(s => s.areaScores[a]).filter(v => v !== null)));
+    CATEGORY_ORDER.forEach(c => overallCategory[c] = average(students.map(s => s.categoryScores[c]).filter(v => v !== null)));
+
+    return { students, overallArea, overallCategory };
+  }
+
+  // ---------- 방사형 차트 (SVG) ----------
+  function cssVar(name) { return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(name).trim(); }
+
+  function buildRadar(container, labels, seriesA, seriesB, min, max) {
+    container.innerHTML = '';
+    const size = 320, cx = size / 2, cy = size / 2, r = size / 2 - 46;
+    const n = labels.length;
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+    svg.setAttribute('width', '100%');
+    svg.style.overflow = 'visible';
+
+    function point(i, value) {
+      const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+      const ratio = Math.max(0, Math.min(1, (value - min) / (max - min)));
+      const rad = r * ratio;
+      return [cx + rad * Math.cos(angle), cy + rad * Math.sin(angle)];
+    }
+
+    const rings = 4;
+    for (let ring = 1; ring <= rings; ring++) {
+      const ratio = ring / rings, pts = [];
+      for (let i = 0; i < n; i++) {
+        const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+        pts.push((cx + r * ratio * Math.cos(angle)) + ',' + (cy + r * ratio * Math.sin(angle)));
+      }
+      const poly = document.createElementNS(svgNS, 'polygon');
+      poly.setAttribute('points', pts.join(' '));
+      poly.setAttribute('class', 'grid-line');
+      svg.appendChild(poly);
+    }
+
+    for (let i = 0; i < n; i++) {
+      const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+      const x2 = cx + r * Math.cos(angle), y2 = cy + r * Math.sin(angle);
+      const line = document.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('class', 'axis-line');
+      svg.appendChild(line);
+
+      const lx = cx + (r + 22) * Math.cos(angle), ly = cy + (r + 22) * Math.sin(angle);
+      const text = document.createElementNS(svgNS, 'text');
+      text.setAttribute('x', lx); text.setAttribute('y', ly);
+      text.setAttribute('text-anchor', Math.abs(Math.cos(angle)) < 0.15 ? 'middle' : (Math.cos(angle) > 0 ? 'start' : 'end'));
+      text.setAttribute('dominant-baseline', 'middle');
+      text.setAttribute('class', 'axis-label');
+      text.textContent = labels[i];
+      svg.appendChild(text);
+    }
+
+    function drawSeries(values, colorVar, opacity) {
+      const pts = values.map((v, i) => point(i, v == null ? min : v));
+      const poly = document.createElementNS(svgNS, 'polygon');
+      poly.setAttribute('points', pts.map(p => p.join(',')).join(' '));
+      poly.setAttribute('fill', cssVar(colorVar));
+      poly.setAttribute('fill-opacity', opacity);
+      poly.setAttribute('stroke', cssVar(colorVar));
+      poly.setAttribute('stroke-width', '2');
+      svg.appendChild(poly);
+      pts.forEach((p, i) => {
+        const c = document.createElementNS(svgNS, 'circle');
+        c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('r', 3.5);
+        c.setAttribute('fill', cssVar(colorVar));
+        const title = document.createElementNS(svgNS, 'title');
+        title.textContent = labels[i] + ': ' + (values[i] == null ? '-' : values[i].toFixed(1));
+        c.appendChild(title);
+        svg.appendChild(c);
+      });
+    }
+
+    drawSeries(seriesB, '--series-avg', 0.12);
+    drawSeries(seriesA, '--series-student', 0.18);
+    container.appendChild(svg);
+  }
+
+  function fmt(v) { return v == null ? '-' : v.toFixed(1); }
+
+  function gapClass(gap) { return gap > 0.05 ? 'gap-up' : gap < -0.05 ? 'gap-down' : ''; }
+  function gapText(gap) { return (gap > 0 ? '+' : '') + gap.toFixed(1); }
+
+  function renderTable(student, avgArea, avgCategory, scopeLabel) {
+    const rows = ['<tr><th>영역</th><th>선택한 학생</th><th>' + scopeLabel + '</th><th>차이</th></tr>'];
+    AREA_ORDER.forEach(a => {
+      const s = student.areaScores[a], v = avgArea[a], gap = (s != null && v != null) ? s - v : null;
+      rows.push('<tr><td>' + QUESTION_MAP.find(q => q.area === a).areaLabel + '</td><td>' + fmt(s) + '</td><td>' + fmt(v) + '</td><td class="' + (gap == null ? '' : gapClass(gap)) + '">' + (gap == null ? '-' : gapText(gap)) + '</td></tr>');
+    });
+    CATEGORY_ORDER.forEach(c => {
+      const s = student.categoryScores[c], v = avgCategory[c], gap = (s != null && v != null) ? s - v : null;
+      rows.push('<tr><td>' + c + '</td><td>' + fmt(s) + '</td><td>' + fmt(v) + '</td><td class="' + (gap == null ? '' : gapClass(gap)) + '">' + (gap == null ? '-' : gapText(gap)) + '</td></tr>');
+    });
+    document.getElementById('table-view').innerHTML = rows.join('');
+  }
+
+  // ---------- 방사형 차트 아래 "평균 대비 차이" 칩 ----------
+  function renderDeltaStrip(containerId, keys, studentScores, avgScores, labelFn) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = keys.map(key => {
+      const s = studentScores[key], v = avgScores[key];
+      if (s == null || v == null) return '';
+      const gap = s - v;
+      const cls = gap > 0.05 ? 'up' : gap < -0.05 ? 'down' : 'flat';
+      return '<span class="delta-chip ' + cls + '"><span class="dot"></span>' + labelFn(key) + ' ' + gapText(gap) + '</span>';
+    }).join('');
+  }
+
+  // ---------- 강점/성장 포인트 분석 ----------
+  function analyzeGaps(student, avgArea, avgCategory) {
+    function ranked(order, studentScores, avgScores) {
+      return order
+        .map(key => ({ key, score: studentScores[key], avg: avgScores[key], gap: (studentScores[key] == null || avgScores[key] == null) ? 0 : studentScores[key] - avgScores[key] }))
+        .filter(r => r.score != null)
+        .sort((x, y) => x.gap - y.gap); // 오름차순: 앞쪽이 가장 약한 지점
+    }
+    const areaRanked = ranked(AREA_ORDER, student.areaScores, avgArea);
+    const catRanked = ranked(CATEGORY_ORDER, student.categoryScores, avgCategory);
+    const aboveAreaCount = areaRanked.filter(r => r.gap > 0.05).length;
+    const aboveCatCount = catRanked.filter(r => r.gap > 0.05).length;
+    return {
+      areaRanked, catRanked,
+      weakArea: areaRanked[0],
+      strongArea: areaRanked[areaRanked.length - 1],
+      weakCat: catRanked[0],
+      strongCat: catRanked[catRanked.length - 1],
+      weakCat2: catRanked[1],
+      aboveAreaCount, aboveCatCount,
+    };
+  }
+
+  function pointCard(kind, title, desc, tip, mission, score, avg) {
+    const pillClass = kind === 'strong' ? 'good' : 'warn';
+    const pillLabel = kind === 'strong' ? '잘하고 있어요 (강점)' : '함께 채워봐요 (성장 포인트)';
+    return '' +
+      '<div class="point-card">' +
+        '<span class="pill ' + pillClass + '">' + pillLabel + '</span>' +
+        '<p class="point-title">' + title + '</p>' +
+        '<p class="point-desc">' + desc + '</p>' +
+        '<p class="point-tip">' + tip + '</p>' +
+        (mission ? '<p class="point-mission"><strong>' + (kind === 'strong' ? '계속 이렇게 →' : '이번 주 미션 →') + '</strong> ' + mission + '</p>' : '') +
+        '<p class="point-score">나 ' + fmt(score) + '점 · 비교 평균 ' + fmt(avg) + '점 (5점 만점, 차이 ' + gapText(score - avg) + ')</p>' +
+      '</div>';
+  }
+
+  function renderNarrative(student, avgArea, avgCategory, scopeLabel) {
+    const g = analyzeGaps(student, avgArea, avgCategory);
+    const panel = document.getElementById('narrative-panel');
+    const areaInfo = key => AREA_INFO[key];
+    const catInfo = key => CATEGORY_INFO[key];
+
+    if (currentTab === 'student') {
+      panel.innerHTML = '' +
+        '<p class="narrative-intro">' + student.grade + '학년 ' + student.cls + '반 ' + student.number + '번 친구, 사전 진단 결과를 살펴봤어요! ' + scopeLabel + '과 비교했을 때 나의 독서 마음이 어디에서 반짝이고, 어디를 더 채우면 좋을지 알려줄게요.</p>' +
+        '<p class="narrative-summary">📊 5개 대영역 중 <strong>' + g.aboveAreaCount + '개</strong>, 6개 읽기 힘 중 <strong>' + g.aboveCatCount + '개</strong>가 ' + scopeLabel + '보다 높게 나왔어요. 이번 여름방학과 2학기, 아래 내용을 하나씩 시도하며 독서에 대한 튼튼한 마음을 함께 키워봐요!</p>' +
+        '<div class="point-grid">' +
+          pointCard('strong', '가장 빛나는 대영역: ' + areaInfo(g.strongArea.key).label, areaInfo(g.strongArea.key).desc, '이미 잘하고 있어요! ' + areaInfo(g.strongArea.key).student, areaInfo(g.strongArea.key).studentMission, g.strongArea.score, g.strongArea.avg) +
+          pointCard('weak', '함께 키워볼 대영역: ' + areaInfo(g.weakArea.key).label, areaInfo(g.weakArea.key).desc, areaInfo(g.weakArea.key).student, areaInfo(g.weakArea.key).studentMission, g.weakArea.score, g.weakArea.avg) +
+          pointCard('strong', '가장 자신 있는 읽기 힘: ' + g.strongCat.key, catInfo(g.strongCat.key).desc, '이 힘은 계속 이렇게 키워가 봐요! ' + catInfo(g.strongCat.key).student, catInfo(g.strongCat.key).studentMission, g.strongCat.score, g.strongCat.avg) +
+          pointCard('weak', '조금 더 연습해볼 읽기 힘: ' + g.weakCat.key, catInfo(g.weakCat.key).desc, catInfo(g.weakCat.key).student, catInfo(g.weakCat.key).studentMission, g.weakCat.score, g.weakCat.avg) +
+        '</div>' +
+        '<div class="closing-note">🌱 지금 점수는 지금의 나일 뿐, 앞으로의 내가 아니에요. 매일 조금씩 실천하다 보면 여름방학이 끝날 때, 그리고 2학기가 끝날 때 훨씬 단단해진 독서 마음을 만나게 될 거예요. 오늘 딱 한 가지만 골라 시작해봐요!</div>';
+    } else {
+      const weakList = [g.weakArea, g.weakCat, g.weakCat2].filter(Boolean);
+      panel.innerHTML = '' +
+        '<p class="narrative-intro">자녀(' + student.grade + '학년 ' + student.cls + '반 ' + student.number + '번)의 독서 사전 진단 결과입니다. ' + scopeLabel + '과 비교한 강점과 보완이 필요한 영역을 확인하시고, 가정에서의 독서 지도에 참고해 주세요.</p>' +
+        '<p class="narrative-summary">📊 5개 대영역 중 <strong>' + g.aboveAreaCount + '개</strong>, 6개 읽기 기능 중 <strong>' + g.aboveCatCount + '개</strong>가 ' + scopeLabel + '보다 높은 결과를 보였습니다. 아래에 구체적인 강점과 보완이 필요한 부분, 가정에서의 실천 방법을 안내드립니다.</p>' +
+        '<div class="point-grid">' +
+          pointCard('strong', '강점 대영역: ' + areaInfo(g.strongArea.key).label, areaInfo(g.strongArea.key).desc, areaInfo(g.strongArea.key).parent, null, g.strongArea.score, g.strongArea.avg) +
+          pointCard('weak', '보완 대영역: ' + areaInfo(g.weakArea.key).label, areaInfo(g.weakArea.key).desc, areaInfo(g.weakArea.key).parent, areaInfo(g.weakArea.key).parentMission, g.weakArea.score, g.weakArea.avg) +
+          pointCard('strong', '강점 읽기 기능: ' + g.strongCat.key, catInfo(g.strongCat.key).desc, catInfo(g.strongCat.key).parent, null, g.strongCat.score, g.strongCat.avg) +
+          pointCard('weak', '보완 읽기 기능: ' + g.weakCat.key, catInfo(g.weakCat.key).desc, catInfo(g.weakCat.key).parent, catInfo(g.weakCat.key).parentMission, g.weakCat.score, g.weakCat.avg) +
+        '</div>' +
+        '<div class="home-guide">' +
+          '<h3>가정 연계 지도 가이드 — 여름방학 · 2학기 실천 제안</h3>' +
+          '<ul>' +
+            weakList.map(w => '<li><strong>' + (CATEGORY_INFO[w.key] ? w.key : AREA_INFO[w.key].label) + ' (' + gapText(w.gap) + '점 차이):</strong> ' + (CATEGORY_INFO[w.key] ? CATEGORY_INFO[w.key].parent : AREA_INFO[w.key].parent) + ' <em>→ ' + (CATEGORY_INFO[w.key] ? CATEGORY_INFO[w.key].parentMission : AREA_INFO[w.key].parentMission) + '</em></li>').join('') +
+            '<li><strong>공통 원칙:</strong> 결과(점수)보다 과정과 노력을 구체적으로 칭찬해 주세요. "5줄이나 더 읽었네, 대단하다!"처럼요. 독서를 학습이 아닌 즐거운 습관으로 느끼게 하는 것이 장기적으로 가장 효과적입니다.</li>' +
+          '</ul>' +
+        '</div>' +
+        '<div class="closing-note">📘 이 진단은 우열을 가리기 위한 것이 아니라, 자녀의 현재 독서 마음 상태를 이해하고 가정에서 어떻게 도와줄지 방향을 찾기 위한 자료입니다. 위 제안 중 한두 가지만 꾸준히 실천해도 충분히 의미 있는 변화를 만들 수 있습니다.</div>';
+    }
+  }
+
+  function renderStudent(key) {
+    const student = DATA.students.find(s => s.key === key);
+    if (!student) return;
+    currentStudent = student;
+    const { areaAvg, categoryAvg, poolSize } = getComparisonAverages(currentScope, student);
+    const scopeLabel = SCOPE_LABEL[currentScope] + ' (' + poolSize + '명 기준)';
+
+    const areaLabels = AREA_ORDER.map(a => QUESTION_MAP.find(q => q.area === a).areaLabel);
+    buildRadar(document.getElementById('chart-area'), areaLabels, AREA_ORDER.map(a => student.areaScores[a]), AREA_ORDER.map(a => areaAvg[a]), SCALE_MIN, SCALE_MAX);
+    buildRadar(document.getElementById('chart-category'), CATEGORY_ORDER, CATEGORY_ORDER.map(c => student.categoryScores[c]), CATEGORY_ORDER.map(c => categoryAvg[c]), SCALE_MIN, SCALE_MAX);
+    renderDeltaStrip('delta-area', AREA_ORDER, student.areaScores, areaAvg, a => QUESTION_MAP.find(q => q.area === a).areaLabel);
+    renderDeltaStrip('delta-category', CATEGORY_ORDER, student.categoryScores, categoryAvg, c => c);
+    document.getElementById('avg-legend-label').lastChild.textContent = SCOPE_LABEL[currentScope];
+    renderTable(student, areaAvg, categoryAvg, SCOPE_LABEL[currentScope]);
+    renderNarrative(student, areaAvg, categoryAvg, scopeLabel);
+
+    const printDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('print-subline').textContent =
+      student.grade + '학년 ' + student.cls + '반 ' + student.number + '번 · 비교 기준: ' + SCOPE_LABEL[currentScope] + ' · 출력일 ' + printDate;
+  }
+
+  function onFileLoaded(text) {
+    const statusEl = document.getElementById('file-status');
+    try {
+      DATA = processCSV(text);
+      statusEl.textContent = '불러오기 완료 · 응답 ' + DATA.students.length + '건';
+      statusEl.classList.remove('error');
+
+      const select = document.getElementById('student-select');
+      select.innerHTML = DATA.students.map(s => '<option value="' + s.key + '">' + s.grade + '학년 ' + s.cls + '반 ' + s.number + '번</option>').join('');
+      document.getElementById('summary-pill').textContent = '전체 평균 산출 기준: ' + DATA.students.length + '명';
+
+      document.getElementById('select-section').classList.remove('hidden');
+      document.getElementById('result-section').classList.remove('hidden');
+      document.getElementById('empty-state').classList.add('hidden');
+
+      renderStudent(select.value);
+    } catch (err) {
+      statusEl.textContent = err.message;
+      statusEl.classList.add('error');
+      document.getElementById('select-section').classList.add('hidden');
+      document.getElementById('result-section').classList.add('hidden');
+    }
+  }
+
+  document.getElementById('file-input').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('file-status').textContent = file.name + ' 읽는 중...';
+    const reader = new FileReader();
+    reader.onload = function (ev) { onFileLoaded(ev.target.result); };
+    reader.onerror = function () {
+      document.getElementById('file-status').textContent = '파일을 읽지 못했습니다.';
+      document.getElementById('file-status').classList.add('error');
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+
+  document.getElementById('student-select').addEventListener('change', function (e) { renderStudent(e.target.value); });
+  document.getElementById('btn-toggle-table').addEventListener('click', function () {
+    document.getElementById('table-scroll').classList.toggle('hidden');
+  });
+  // ---------- 인쇄 / PDF 저장 ----------
+  // 이 페이지는 claude.ai의 격리된 미리보기 화면(iframe)에서 열리기 때문에
+  // window.print()가 브라우저에 따라 아무 반응 없이 막히는 경우가 있다.
+  // 그래서 "독립된 인쇄용 HTML 파일을 다운로드 → 그 파일을 열어서 인쇄"하는
+  // 방식을 기본으로 쓰고, 화면에서 바로 인쇄 시도하는 버튼은 보조로 남겨둔다.
+  function printFileName() {
+    if (!currentStudent) return ORIGINAL_TITLE;
+    return currentStudent.grade + '학년' + currentStudent.cls + '반' + currentStudent.number + '번_독서진단리포트';
+  }
+
+  function triggerPrint() {
+    document.title = printFileName();
+    window.print();
+    var restore = function () { document.title = ORIGINAL_TITLE; window.removeEventListener('afterprint', restore); };
+    window.addEventListener('afterprint', restore);
+    setTimeout(restore, 15000);
+  }
+
+  function buildPrintableSnapshotHTML() {
+    const styleContent = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
+    const printHeaderHTML = document.getElementById('print-header').outerHTML;
+    const chartsHTML = document.querySelector('.charts-grid').outerHTML;
+    const legendHTML = document.querySelector('#result-section .legend').outerHTML;
+    const narrativeHTML = document.getElementById('narrative-panel').outerHTML;
+    const tableHTML = document.getElementById('table-view').outerHTML;
+    const title = printFileName();
+
+    return '<!doctype html><html><head><meta charset="utf-8"><title>' + title + '</title><style>' +
+      styleContent +
+      '\nbody{ margin:0; } .dl-toolbar{ text-align:center; padding:16px; } ' +
+      '.dl-toolbar button{ padding:12px 26px; font-size:15.5px; font-weight:700; border-radius:10px; border:none; background:#2a78d6; color:#fff; cursor:pointer; } ' +
+      '@media print{ .dl-toolbar{ display:none !important; } } ' +
+      '.print-only{ display:block !important; }' +
+      '</style></head><body><div class="viz-root">' +
+      '<div class="dl-toolbar"><button onclick="window.print()">🖨️ 인쇄 / PDF로 저장</button></div>' +
+      '<div style="max-width:900px; margin:0 auto; padding:0 16px 40px;">' +
+      printHeaderHTML + chartsHTML + legendHTML + narrativeHTML + tableHTML +
+      '</div></div></body></html>';
+  }
+
+  function downloadPrintableReport() {
+    const html = buildPrintableSnapshotHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = printFileName() + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('btn-download-report').addEventListener('click', downloadPrintableReport);
+  document.getElementById('btn-print').addEventListener('click', triggerPrint);
+
+  document.getElementById('scope-toggle').addEventListener('click', function (e) {
+    const btn = e.target.closest('button[data-scope]');
+    if (!btn) return;
+    currentScope = btn.dataset.scope;
+    this.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+    renderStudent(document.getElementById('student-select').value);
+  });
+
+  document.querySelector('.tabs').addEventListener('click', function (e) {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    currentTab = btn.dataset.tab;
+    this.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    renderStudent(document.getElementById('student-select').value);
+  });
+})();
+</script>
