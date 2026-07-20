@@ -108,11 +108,7 @@
     .delta-chip.flat { color: var(--text-muted); background: var(--surface-2); }
     .delta-chip.flat .dot { background: var(--text-muted); }
 
-    #result-name { text-align: center; font-size: 19px; font-weight: 800; margin: -4px 0 14px; }
     .report-page.hidden-tab { display: none; }
-    .page-head { margin-bottom: 14px; }
-    .page-head-title { font-size: 20px; font-weight: 800; }
-    .page-head-sub { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
 
     .tabs { display: flex; gap: 8px; margin: 22px 0 14px; border-bottom: 1px solid var(--border); }
     .tab-btn {
@@ -121,6 +117,45 @@
       color: var(--text-muted); cursor: pointer;
     }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ---- 리포트 꾸밈 (기존 문구는 그대로 두고 카드/아이콘 스타일만 추가) ---- */
+    .rpt-hero { text-align: center; padding: 2px 0 12px; }
+    .rpt-hero-title { font-size: 23px; font-weight: 800; }
+    .rpt-name-badge {
+      display: inline-block; margin-top: 8px; padding: 5px 20px; border-radius: 999px;
+      background: #ece4ff; color: #6b4fd1; font-size: 15px; font-weight: 700;
+    }
+    @media (prefers-color-scheme: dark) {
+      .rpt-name-badge { background: #3a2f5c; color: #c9b8ff; }
+    }
+    .rpt-hero-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+    .rpt-charts-card {
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+      background: var(--surface-1); border: 1px solid var(--border);
+    }
+    .rpt-charts-card .charts { margin-bottom: 4px; }
+    .rpt-stat-card {
+      display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;
+      padding: 14px 16px; border-radius: 14px; background: #eaf2ff; border: 1px solid #cfe0ff;
+    }
+    @media (prefers-color-scheme: dark) { .rpt-stat-card { background: #1c2a44; border-color: #2c3f63; } }
+    .rpt-stat-icon {
+      flex: none; width: 38px; height: 38px; border-radius: 50%; background: #dbe8ff;
+      display: flex; align-items: center; justify-content: center; font-size: 17px;
+    }
+    @media (prefers-color-scheme: dark) { .rpt-stat-icon { background: #28406b; } }
+    .rpt-stat-card .narrative-intro, .rpt-stat-card .narrative-summary { margin: 0 0 8px; padding: 0; background: none; border: none; }
+    .rpt-stat-card .narrative-summary:last-child { margin-bottom: 0; }
+    .rpt-point-card.strong { background: #eafbf0; border-color: #c9f2d6; }
+    .rpt-point-card.weak { background: #fff8e8; border-color: #ffe8b3; }
+    @media (prefers-color-scheme: dark) {
+      .rpt-point-card.strong { background: #163524; border-color: #1f5236; }
+      .rpt-point-card.weak { background: #3a3013; border-color: #5c4b17; }
+    }
+    .rpt-point-card.strong .pill.good { background: #d7f5df; color: #1f7a41; }
+    .rpt-point-card.weak .pill.warn { background: #ffedc2; color: #92600a; }
+    .rpt-closing-bar { background: #fff9e0; border-color: #ffe9a8; }
+    @media (prefers-color-scheme: dark) { .rpt-closing-bar { background: #3a3410; border-color: #574c14; } }
 
     .narrative-intro { font-size: 15.5px; line-height: 1.75; color: var(--text-secondary); margin: 0 0 16px; }
     .narrative-summary { font-size: 15.5px; line-height: 1.7; margin: 0 0 16px; padding: 12px 16px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); }
@@ -190,15 +225,19 @@
       }
       .card { border: none; border-radius: 0; padding: 0; box-shadow: none; max-width: 100%; }
       body > .card:first-of-type, #scope-toggle, .form-row .segmented, .toggle-table, .print-bar,
-      #scope-toggle-row, .tabs, #result-name { display: none !important; }
+      #scope-toggle-row, .tabs { display: none !important; }
       .print-only { display: block; }
       .point-card, .chart-box, .narrative-summary, .closing-note { break-inside: avoid; }
       .charts { break-inside: avoid; }
       table, #table-view { display: none !important; }
 
-      .report-page .page-head { margin-bottom: 8px; }
-      .report-page .page-head-title { font-size: 16px; }
-      .report-page .page-head-sub { font-size: 11px; margin-top: 2px; }
+      .report-page .rpt-hero { padding: 0 0 6px; }
+      .report-page .rpt-hero-title { font-size: 17px; }
+      .report-page .rpt-name-badge { padding: 3px 14px; font-size: 12px; margin-top: 4px; }
+      .report-page .rpt-hero-sub { font-size: 9.5px; margin-top: 3px; }
+      .report-page .rpt-charts-card { padding: 8px 10px; margin-bottom: 8px; }
+      .report-page .rpt-stat-card { padding: 8px 10px; margin-bottom: 8px; gap: 8px; }
+      .report-page .rpt-stat-icon { width: 26px; height: 26px; font-size: 13px; }
       .report-page .charts { flex-wrap: nowrap; gap: 8px; }
       .report-page .chart-box { flex: 1 1 0; max-width: 48%; min-width: 0; }
       .report-page .chart-box .chart-title { font-size: 13px; margin-bottom: 0; }
@@ -240,8 +279,6 @@
   </div>
 
   <div id="result" class="card hidden">
-    <div id="result-name">이름</div>
-
     <div id="scope-toggle-row" class="form-row" style="justify-content:center; margin-bottom:16px;">
       <span style="font-size:14px; color:var(--text-secondary);">비교 대상</span>
       <div class="segmented" id="scope-toggle">
@@ -257,47 +294,11 @@
     </div>
 
     <div id="page-student" class="report-page">
-      <div class="print-only page-head">
-        <div class="page-head-title">독서 진단 리포트 · 학생용</div>
-        <div id="print-subline-student" class="page-head-sub"></div>
-      </div>
-      <div class="charts">
-        <div class="chart-box">
-          <div class="chart-title">① 5개 대영역</div>
-          <div id="chart-area-student"></div>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">② 6개 하위영역</div>
-          <div id="chart-category-student"></div>
-        </div>
-      </div>
-      <div class="legend">
-        <span><span class="swatch" style="background:var(--series-student)"></span>나의 점수</span>
-        <span id="avg-legend-label-student"><span class="swatch" style="background:var(--series-avg)"></span>전체 평균</span>
-      </div>
-      <div id="narrative-panel-student"></div>
+      <div id="rpt-body-student"></div>
     </div>
 
     <div id="page-parent" class="report-page hidden-tab">
-      <div class="print-only page-head">
-        <div class="page-head-title">독서 진단 리포트 · 학부모용</div>
-        <div id="print-subline-parent" class="page-head-sub"></div>
-      </div>
-      <div class="charts">
-        <div class="chart-box">
-          <div class="chart-title">① 5개 대영역</div>
-          <div id="chart-area-parent"></div>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">② 6개 하위영역</div>
-          <div id="chart-category-parent"></div>
-        </div>
-      </div>
-      <div class="legend">
-        <span><span class="swatch" style="background:var(--series-student)"></span>자녀 점수</span>
-        <span id="avg-legend-label-parent"><span class="swatch" style="background:var(--series-avg)"></span>전체 평균</span>
-      </div>
-      <div id="narrative-panel-parent"></div>
+      <div id="rpt-body-parent"></div>
     </div>
 
     <div class="toggle-table">
@@ -538,7 +539,7 @@
       const pillClass = kind === 'strong' ? 'good' : 'warn';
       const pillLabel = kind === 'strong' ? '잘하고 있어요 (강점)' : '함께 채워봐요 (성장 포인트)';
       return '' +
-        '<div class="point-card">' +
+        '<div class="point-card rpt-point-card ' + kind + '">' +
           '<span class="pill ' + pillClass + '">' + pillLabel + '</span>' +
           '<p class="point-title">' + title + '</p>' +
           '<p class="point-desc">' + desc + '</p>' +
@@ -556,25 +557,56 @@
       const strongLabel = g.strong.type === 'area' ? '대영역' : '읽기 힘';
       const weakLabel = g.weak.type === 'area' ? '대영역' : '읽기 힘';
 
-      const studentPanel = document.getElementById('narrative-panel-student');
-      studentPanel.innerHTML = '' +
-        '<p class="narrative-intro">' + name + ' 친구, 사전 진단 결과를 살펴봤어요! ' + avg.label + '과 비교했을 때 나의 독서 마음이 어디에서 반짝이고, 어디를 더 채우면 좋을지 알려줄게요.</p>' +
-        '<p class="narrative-summary">📊 5개 대영역과 6개 읽기 힘 중 <strong>' + g.aboveCount + '개 / ' + g.totalCount + '개</strong>가 ' + avg.label + '보다 높게 나왔어요. 이번 여름방학과 2학기, 아래 내용을 하나씩 시도하며 독서에 대한 튼튼한 마음을 함께 키워봐요!</p>' +
+      function chartsCardHTML(idSuffix, seriesLabel) {
+        return '' +
+          '<div class="rpt-charts-card">' +
+            '<div class="charts">' +
+              '<div class="chart-box"><div class="chart-title">① 5개 대영역</div><div id="chart-area-' + idSuffix + '"></div></div>' +
+              '<div class="chart-box"><div class="chart-title">② 6개 하위영역</div><div id="chart-category-' + idSuffix + '"></div></div>' +
+            '</div>' +
+            '<div class="legend">' +
+              '<span><span class="swatch" style="background:var(--series-student)"></span>' + seriesLabel + '</span>' +
+              '<span id="avg-legend-label-' + idSuffix + '"><span class="swatch" style="background:var(--series-avg)"></span>전체 평균</span>' +
+            '</div>' +
+          '</div>';
+      }
+
+      function heroHTML(idSuffix) {
+        return '' +
+          '<div class="rpt-hero">' +
+            '<div class="rpt-hero-title">✨📖 독서 진단 결과 ✨</div>' +
+            '<div class="rpt-name-badge">' + name + '</div>' +
+            '<div id="print-subline-' + idSuffix + '" class="rpt-hero-sub print-only"></div>' +
+          '</div>';
+      }
+
+      const studentBody = document.getElementById('rpt-body-student');
+      studentBody.innerHTML = '' +
+        heroHTML('student') +
+        chartsCardHTML('student', '나의 점수') +
+        '<div class="rpt-stat-card"><div class="rpt-stat-icon">📊</div><div class="rpt-stat-text">' +
+          '<p class="narrative-intro">' + name + ' 친구, 사전 진단 결과를 살펴봤어요! ' + avg.label + '과 비교했을 때 나의 독서 마음이 어디에서 반짝이고, 어디를 더 채우면 좋을지 알려줄게요.</p>' +
+          '<p class="narrative-summary">📊 5개 대영역과 6개 읽기 힘 중 <strong>' + g.aboveCount + '개 / ' + g.totalCount + '개</strong>가 ' + avg.label + '보다 높게 나왔어요. 이번 여름방학과 2학기, 아래 내용을 하나씩 시도하며 독서에 대한 튼튼한 마음을 함께 키워봐요!</p>' +
+        '</div></div>' +
         '<div class="point-grid">' +
           pointCard('strong', '가장 빛나는 ' + strongLabel + ': ' + g.strong.label, strongInfo.desc, '이미 잘하고 있어요! ' + strongInfo.student, strongInfo.studentMission, g.strong.score, g.strong.avg, false) +
           pointCard('weak', '함께 키워볼 ' + weakLabel + ': ' + g.weak.label, weakInfo.desc, weakInfo.student, weakInfo.studentMission, g.weak.score, g.weak.avg, false) +
         '</div>' +
-        '<div class="closing-note">🌱 지금 점수는 지금의 나일 뿐, 앞으로의 내가 아니에요. 매일 조금씩 실천하다 보면 여름방학이 끝날 때, 그리고 2학기가 끝날 때 훨씬 단단해진 독서 마음을 만나게 될 거예요. 오늘 딱 한 가지만 골라 시작해봐요!</div>';
+        '<div class="closing-note rpt-closing-bar">🌱 지금 점수는 지금의 나일 뿐, 앞으로의 내가 아니에요. 매일 조금씩 실천하다 보면 여름방학이 끝날 때, 그리고 2학기가 끝날 때 훨씬 단단해진 독서 마음을 만나게 될 거예요. 오늘 딱 한 가지만 골라 시작해봐요!</div>';
 
-      const parentPanel = document.getElementById('narrative-panel-parent');
-      parentPanel.innerHTML = '' +
-        '<p class="narrative-intro">자녀(' + name + ')의 독서 사전 진단 결과입니다. ' + avg.label + '과 비교한 강점과 보완이 필요한 부분을 확인하시고, 가정에서의 독서 지도에 참고해 주세요.</p>' +
-        '<p class="narrative-summary">📊 5개 대영역과 6개 읽기 기능 중 <strong>' + g.aboveCount + '개 / ' + g.totalCount + '개</strong>가 ' + avg.label + '보다 높은 결과를 보였습니다. 아래에 강점과 보완이 필요한 부분, 가정에서의 실천 방법을 안내드립니다.</p>' +
+      const parentBody = document.getElementById('rpt-body-parent');
+      parentBody.innerHTML = '' +
+        heroHTML('parent') +
+        chartsCardHTML('parent', '자녀 점수') +
+        '<div class="rpt-stat-card"><div class="rpt-stat-icon">📊</div><div class="rpt-stat-text">' +
+          '<p class="narrative-intro">자녀(' + name + ')의 독서 사전 진단 결과입니다. ' + avg.label + '과 비교한 강점과 보완이 필요한 부분을 확인하시고, 가정에서의 독서 지도에 참고해 주세요.</p>' +
+          '<p class="narrative-summary">📊 5개 대영역과 6개 읽기 기능 중 <strong>' + g.aboveCount + '개 / ' + g.totalCount + '개</strong>가 ' + avg.label + '보다 높은 결과를 보였습니다. 아래에 강점과 보완이 필요한 부분, 가정에서의 실천 방법을 안내드립니다.</p>' +
+        '</div></div>' +
         '<div class="point-grid">' +
           pointCard('strong', '강점 ' + strongLabel + ': ' + g.strong.label, strongInfo.desc, strongInfo.parent, null, g.strong.score, g.strong.avg, true) +
           pointCard('weak', '보완 ' + weakLabel + ': ' + g.weak.label, weakInfo.desc, weakInfo.parent, weakInfo.parentMission, g.weak.score, g.weak.avg, true) +
         '</div>' +
-        '<div class="closing-note">' +
+        '<div class="closing-note rpt-closing-bar">' +
           '<p class="mt-title">🧭 가정에서 함께: 독서 미션지로 메타인지 키우기</p>' +
           '<p class="mt-p">여름방학 독서 미션지(읽기 전 · 읽으며 · 읽은 후)는 아이가 독서 목적을 분명히 하고 생각을 점검하는 메타인지 훈련에 좋은 도구예요. 책마다 할 수 있는 미션이 달라 7개 중 3개만 해도 충분하고 정답은 없으니, 가정의 어른께서 도구 없이 아래처럼 편하게 함께 봐주세요.</p>' +
           '<ul class="mt-list">' +
@@ -589,6 +621,7 @@
     function renderAll() {
       const report = lastReport;
       const avg = currentAvg();
+      renderNarrative(report); // 차트를 담을 빈 컨테이너를 포함한 리포트 DOM을 먼저 만든다
       buildRadar(document.getElementById('chart-area-student'), report.areaLabels, report.studentArea, avg.area, SCALE_MIN, SCALE_MAX);
       buildRadar(document.getElementById('chart-category-student'), report.categoryLabels, report.studentCategory, avg.category, SCALE_MIN, SCALE_MAX);
       buildRadar(document.getElementById('chart-area-parent'), report.areaLabels, report.studentArea, avg.area, SCALE_MIN, SCALE_MAX);
@@ -596,10 +629,8 @@
       document.getElementById('avg-legend-label-student').lastChild.textContent = avg.label;
       document.getElementById('avg-legend-label-parent').lastChild.textContent = avg.label;
       renderTable(report);
-      renderNarrative(report);
 
       const name = report.name || (report.grade + '학년 ' + report.cls + '반 ' + report.number + '번');
-      document.getElementById('result-name').textContent = name;
       const printDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
       const subline = name + ' · 비교 기준: ' + avg.label + ' · 출력일 ' + printDate;
       document.getElementById('print-subline-student').textContent = subline;
