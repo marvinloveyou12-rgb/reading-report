@@ -257,7 +257,7 @@
 
       <div class="card">
         <p class="section-title">반별 일괄 인쇄</p>
-        <p class="section-sub">반을 선택하면 그 반 학생 전원의 리포트(학생 1명당 A4 1장, 같은 반 평균과 비교)를 한 파일로 모아 다운로드합니다. 다운로드한 파일을 열어 인쇄하면 여러 장이 한 번에 출력돼요.</p>
+        <p class="section-sub">반을 선택하거나 "전체 학생"을 선택하면, 학생 전원의 리포트(1명당 A4 1장, 반별 선택 시 같은 반 평균과 비교 / 전체 선택 시 전체 평균과 비교)를 한 파일로 모아 다운로드합니다. 학생을 일일이 클릭할 필요 없이, 다운로드한 파일을 열어 인쇄하면 여러 장이 한 번에 출력돼요.</p>
         <div class="select-row" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
           <select id="batch-class-picker">
             <option value="">반을 선택하세요</option>
@@ -512,23 +512,36 @@
         .sort((a, b) => a.key > b.key ? 1 : -1)
         .map(g => '<option value="' + g.key + '">' + g.label + ' (' + g.count + '명)</option>')
         .join('');
-      picker.innerHTML = '<option value="">반을 선택하세요</option>' + options;
+      picker.innerHTML =
+        '<option value="">반을 선택하세요</option>' +
+        '<option value="ALL">전체 학생 (' + ROSTER.roster.length + '명, 모든 학년·반)</option>' +
+        options;
     }
 
-    function buildClassBatchHTML(gradeKey, clsKey, audience) {
-      const students = ROSTER.roster
-        .filter(s => s.grade === gradeKey && s.cls === clsKey)
-        .slice()
-        .sort((a, b) => Number(String(a.number).replace(/\D/g, '')) - Number(String(b.number).replace(/\D/g, '')));
+    function buildBatchHTML(scopeVal, audience) {
+      const isAll = scopeVal === 'ALL';
+      let students, avgAreaArr, avgCategoryArr, scopeLabel;
 
-      const avgAreaArr = ROSTER.areaLabels.map((_, i) => average(students.map(s => s.area[i])));
-      const avgCategoryArr = ROSTER.categoryLabels.map((_, i) => average(students.map(s => s.category[i])));
+      if (isAll) {
+        students = ROSTER.roster.slice().sort((a, b) => (a.grade + '|' + a.cls + '|' + a.number) > (b.grade + '|' + b.cls + '|' + b.number) ? 1 : -1);
+        avgAreaArr = ROSTER.overallArea;
+        avgCategoryArr = ROSTER.overallCategory;
+        scopeLabel = '전체 학생';
+      } else {
+        const [gradeKey, clsKey] = scopeVal.split('|');
+        students = ROSTER.roster
+          .filter(s => s.grade === gradeKey && s.cls === clsKey)
+          .slice()
+          .sort((a, b) => Number(String(a.number).replace(/\D/g, '')) - Number(String(b.number).replace(/\D/g, '')));
+        avgAreaArr = ROSTER.areaLabels.map((_, i) => average(students.map(s => s.area[i])));
+        avgCategoryArr = ROSTER.categoryLabels.map((_, i) => average(students.map(s => s.category[i])));
+        scopeLabel = gradeLabel(gradeKey) + ' ' + clsLabel(clsKey);
+      }
 
       const pagesHTML = students.map(s => buildStudentPageHTML(s, avgAreaArr, avgCategoryArr, audience)).join('');
       const styleContent = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
       const audienceLabel = audience === 'parent' ? '학부모용' : '학생용';
-      const classLabel = gradeLabel(gradeKey) + ' ' + clsLabel(clsKey);
-      const title = classLabel + '_' + audienceLabel + '_전체_독서진단리포트';
+      const title = scopeLabel + '_' + audienceLabel + '_전체_독서진단리포트';
 
       const html = '<!doctype html><html><head><meta charset="utf-8"><title>' + title + '</title><style>' +
         styleContent +
@@ -546,19 +559,21 @@
     function downloadClassBatch(audience) {
       const msg = document.getElementById('batch-msg');
       const val = document.getElementById('batch-class-picker').value;
-      if (!val) { msg.textContent = '반을 먼저 선택해 주세요.'; return; }
-      const [gradeKey, clsKey] = val.split('|');
-      const { title, html, count } = buildClassBatchHTML(gradeKey, clsKey, audience);
-      const blob = new Blob([html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = title + '.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      msg.textContent = count + '명 분량의 파일을 다운로드했습니다. 파일을 열어 인쇄해 주세요.';
+      if (!val) { msg.textContent = '반을 먼저 선택해 주세요 ("전체 학생"도 선택 가능해요).'; return; }
+      msg.textContent = '파일 만드는 중... (전체 학생을 고르셨다면 잠시 걸릴 수 있어요)';
+      setTimeout(function () {
+        const { title, html, count } = buildBatchHTML(val, audience);
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = title + '.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        msg.textContent = count + '명 분량의 파일을 다운로드했습니다. 파일을 열어 인쇄해 주세요.';
+      }, 10);
     }
 
     function computeGroupAverages(labelFn, keyFn) {
