@@ -261,6 +261,18 @@ function normalizeIdValue_(v) {
   return digits ? String(Number(digits[0])) : s;
 }
 
+// "학년-반-번호" 형태의 key를 학년/반/번호 각각 숫자로 비교한다.
+// 문자열 그대로 비교하면 "10번"이 "2번"보다 앞에 오는 등 순서가 뒤섞이는 문제를 막는다.
+function compareStudentKey_(a, b) {
+  const pa = String(a.key).split('-').map(Number);
+  const pb = String(b.key).split('-').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
 function computeAllScores_() {
   const sheet = getResponseSheet_();
   const data = sheet.getDataRange().getValues();
@@ -348,7 +360,7 @@ function writeResultSheet_() {
   sheet.appendRow(headers);
 
   all.latestStudents
-    .sort((a, b) => (a.key > b.key ? 1 : -1))
+    .sort(compareStudentKey_)
     .forEach(s => {
       sheet.appendRow([
         s.grade, s.cls, s.number, s.name,
@@ -417,7 +429,7 @@ function getAdminRoster(passcode) {
 
   const roster = all.latestStudents
     .slice()
-    .sort((a, b) => (a.key > b.key ? 1 : -1))
+    .sort(compareStudentKey_)
     .map(s => {
       const area = AREA_ORDER.map(a => s.areaScores[a]);
       const category = CATEGORY_ORDER.map(c => s.categoryScores[c]);

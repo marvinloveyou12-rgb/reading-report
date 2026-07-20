@@ -71,7 +71,7 @@
     min-height: 100vh;
     padding: 28px 16px 64px;
   }
-  .viz-root * { box-sizing: border-box; }
+  .viz-root * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
   header.page-head h1 { font-size: 27px; font-weight: 700; margin: 0 0 6px; text-wrap: balance; }
@@ -141,42 +141,78 @@
 
   .report-page.hidden-tab { display: none; }
 
-  /* ---- 리포트 꾸밈 (기존 문구는 그대로 두고 카드/아이콘 스타일만 추가) ---- */
+  /* ---- 리포트 꾸밈: 산뜻한 카드형 디자인 ---- */
+  .rpt-frame { border: 3px solid #dbe4ff; border-radius: 20px; padding: 18px 20px 16px; background: #fff; }
+  @media (prefers-color-scheme: dark) { .rpt-frame { border-color: #33417a; background: #14161c; } }
   .rpt-hero { text-align: center; padding: 2px 0 12px; }
-  .rpt-hero-title { font-size: 23px; font-weight: 800; }
+  .rpt-hero-title { font-size: 26px; font-weight: 900; color: #2348c7; letter-spacing: -0.3px; }
+  @media (prefers-color-scheme: dark) { .rpt-hero-title { color: #8fa8ff; } }
   .rpt-name-badge {
-    display: inline-block; margin-top: 8px; padding: 5px 20px; border-radius: 999px;
-    background: #ece4ff; color: #6b4fd1; font-size: 15px; font-weight: 700;
+    display: inline-block; margin-top: 8px; padding: 6px 24px; border-radius: 999px;
+    background: #ece4ff; color: #6b4fd1; font-size: 16px; font-weight: 800; border: 1px solid #d9c8ff;
   }
-  @media (prefers-color-scheme: dark) { .rpt-name-badge { background: #3a2f5c; color: #c9b8ff; } }
+  @media (prefers-color-scheme: dark) { .rpt-name-badge { background: #3a2f5c; color: #c9b8ff; border-color: #4a3d72; } }
   .rpt-hero-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-  .rpt-charts-card {
-    border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
-    background: var(--surface-1); border: 1px solid var(--border);
+
+  .rpt-banner-wrap { text-align: center; margin: 4px 0 12px; }
+  .rpt-banner {
+    display: inline-block; background: linear-gradient(90deg,#2f6fed,#4f8bff); color: #fff;
+    font-weight: 800; font-size: 15.5px; padding: 8px 28px; border-radius: 999px;
   }
+  .rpt-charts-card {
+    border-radius: 16px; padding: 14px 16px 6px; margin-bottom: 14px;
+    background: #f6f8ff; border: 1px solid #dde5ff;
+  }
+  @media (prefers-color-scheme: dark) { .rpt-charts-card { background: #1b2033; border-color: #2b3358; } }
   .rpt-charts-card .charts-grid { margin-bottom: 4px; }
+
   .rpt-stat-card {
     display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;
-    padding: 14px 16px; border-radius: 14px; background: #eaf2ff; border: 1px solid #cfe0ff;
+    padding: 14px 16px; border-radius: 16px; background: #e8f0ff; border: 1px solid #c3d7ff;
   }
   @media (prefers-color-scheme: dark) { .rpt-stat-card { background: #1c2a44; border-color: #2c3f63; } }
   .rpt-stat-icon {
-    flex: none; width: 38px; height: 38px; border-radius: 50%; background: #dbe8ff;
-    display: flex; align-items: center; justify-content: center; font-size: 17px;
+    flex: none; width: 40px; height: 40px; border-radius: 50%; background: #cfe0ff;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
   }
   @media (prefers-color-scheme: dark) { .rpt-stat-icon { background: #28406b; } }
   .rpt-stat-card .narrative-intro, .rpt-stat-card .narrative-summary { margin: 0 0 8px; padding: 0; background: none; border: none; }
   .rpt-stat-card .narrative-summary:last-child { margin-bottom: 0; }
-  .rpt-point-card.strong { background: #eafbf0; border-color: #c9f2d6; }
-  .rpt-point-card.weak { background: #fff8e8; border-color: #ffe8b3; }
+
+  .rpt-card-icon-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .rpt-icon-circle {
+    flex: none; width: 26px; height: 26px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 13px; color: #fff;
+  }
+  .rpt-icon-circle.strong { background: #2fb35a; }
+  .rpt-icon-circle.weak { background: #f0a41e; }
+  .rpt-icon-circle.tips { background: #7c5cf0; }
+  .rpt-icon-circle.cheer { background: #f0b41e; }
+  .rpt-card-head-text { font-size: 15px; font-weight: 800; }
+
+  .rpt-point-card.strong { background: #eafbf0; border-color: #b7ecc8; border-width: 1.5px; }
+  .rpt-point-card.weak { background: #fff6e2; border-color: #ffdd94; border-width: 1.5px; }
   @media (prefers-color-scheme: dark) {
     .rpt-point-card.strong { background: #163524; border-color: #1f5236; }
     .rpt-point-card.weak { background: #3a3013; border-color: #5c4b17; }
   }
-  .rpt-point-card.strong .pill.good { background: #d7f5df; color: #1f7a41; }
-  .rpt-point-card.weak .pill.warn { background: #ffedc2; color: #92600a; }
-  .rpt-closing-bar { background: #fff9e0; border-color: #ffe9a8; }
-  @media (prefers-color-scheme: dark) { .rpt-closing-bar { background: #3a3410; border-color: #574c14; } }
+  .rpt-point-card .pill { display: none; }
+
+  .rpt-tips-card, .rpt-cheer-card { border-radius: 16px; padding: 14px 16px; border-width: 1.5px; border-style: solid; }
+  .rpt-tips-card { background: #f1ecff; border-color: #d9c8ff; }
+  .rpt-cheer-card { background: #fff8dc; border-color: #ffe293; }
+  @media (prefers-color-scheme: dark) {
+    .rpt-tips-card { background: #241d3f; border-color: #3a2f5c; }
+    .rpt-cheer-card { background: #3a3410; border-color: #574c14; }
+  }
+  .rpt-tip-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; line-height: 1.4; margin-bottom: 9px; }
+  .rpt-tip-item:last-child { margin-bottom: 0; }
+  .rpt-tip-num {
+    flex: none; width: 20px; height: 20px; border-radius: 50%; background: #7c5cf0; color: #fff;
+    font-size: 10.5px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  }
+  .rpt-tip-p { font-size: 12px; line-height: 1.45; margin: 0 0 8px; color: var(--text-secondary); }
+  .rpt-cheer-card p { font-size: 12.5px; line-height: 1.5; margin: 0; }
 
   .tabs { display: flex; gap: 8px; margin: 22px 0 14px; border-bottom: 1px solid var(--border); }
   .tab-btn {
@@ -205,18 +241,6 @@
   .point-card .point-mission strong { color: var(--accent); }
   .point-card .point-score { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; font-variant-numeric: tabular-nums; }
 
-  .closing-note {
-    margin-top: 16px; padding: 16px 18px; border-radius: 10px;
-    background: var(--status-good-bg); border: 1px solid var(--border); font-size: 15px; line-height: 1.75;
-  }
-  .closing-note .mt-title { margin: 0 0 8px; font-weight: 700; }
-  .closing-note .mt-p { margin: 0 0 8px; }
-  .closing-note .mt-list { margin: 0 0 8px; padding-left: 18px; line-height: 1.6; }
-  .closing-note .mt-final { margin: 0; }
-  .home-guide { margin-top: 16px; }
-  .home-guide h3 { font-size: 14.5px; margin: 0 0 8px; color: var(--text-secondary); }
-  .home-guide ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 9px; }
-  .home-guide li { font-size: 15px; line-height: 1.65; }
 
   .axis-label { font-size: 12.5px; fill: var(--text-secondary); }
   .grid-line { stroke: var(--grid); fill: none; }
@@ -266,16 +290,19 @@
     #upload-section, #select-section, .print-bar, .table-toggle { display: none !important; }
     header.page-head, #empty-state { display: none; }
     .print-only { display: block; }
-    .point-card, .chart-card, .narrative-summary, .closing-note { break-inside: avoid; }
+    .point-card, .chart-card, .narrative-summary, .rpt-tips-card, .rpt-cheer-card { break-inside: avoid; }
     .charts-grid { break-inside: avoid; }
     #table-scroll { display: none !important; }
     .tabs { display: none !important; }
     a[href]::after { content: ""; }
 
+    .report-page .rpt-frame { padding: 6px 8px 4px; border-width: 2px; }
     .report-page .rpt-hero { padding: 0 0 6px; }
     .report-page .rpt-hero-title { font-size: 17px; }
     .report-page .rpt-name-badge { padding: 3px 14px; font-size: 12px; margin-top: 4px; }
     .report-page .rpt-hero-sub { font-size: 9.5px; margin-top: 3px; }
+    .report-page .rpt-banner-wrap { margin: 0 0 6px; }
+    .report-page .rpt-banner { font-size: 11.5px; padding: 4px 16px; }
     .report-page .rpt-charts-card { padding: 8px 10px; margin-bottom: 8px; }
     .report-page .rpt-stat-card { padding: 8px 10px; margin-bottom: 8px; gap: 8px; }
     .report-page .rpt-stat-icon { width: 26px; height: 26px; font-size: 13px; }
@@ -288,17 +315,19 @@
     .report-page .narrative-summary { font-size: 11.5px; line-height: 1.4; padding: 6px 10px; margin-bottom: 7px; }
     .report-page .point-grid { gap: 7px; }
     .report-page .point-card { padding: 7px 9px; }
-    .report-page .point-card .pill { font-size: 10.5px; padding: 3px 8px; margin-bottom: 5px; }
+    .report-page .rpt-card-icon-head { margin-bottom: 5px; gap: 6px; }
+    .report-page .rpt-icon-circle { width: 18px; height: 18px; font-size: 9px; }
+    .report-page .rpt-card-head-text { font-size: 11.5px; }
     .report-page .point-card .point-title { font-size: 12.5px; margin-bottom: 3px; }
     .report-page .point-card .point-desc { font-size: 10.5px; margin-bottom: 4px; line-height: 1.35; }
     .report-page .point-card .point-tip { font-size: 11.5px; line-height: 1.38; }
     .report-page .point-card .point-mission { font-size: 11px; margin-top: 4px; padding-top: 4px; }
     .report-page .point-card .point-score { font-size: 10px; margin-top: 4px; }
-    .report-page .closing-note { font-size: 11px; line-height: 1.38; padding: 7px 10px; margin-top: 7px; }
-    .report-page .closing-note .mt-title { margin-bottom: 4px; }
-    .report-page .closing-note .mt-p { margin-bottom: 4px; }
-    .report-page .closing-note .mt-list { margin-bottom: 4px; padding-left: 14px; line-height: 1.35; }
-    .report-page .closing-note .mt-list li { margin-bottom: 2px; }
+    .report-page .rpt-tips-card, .report-page .rpt-cheer-card { padding: 7px 9px; }
+    .report-page .rpt-tip-item { font-size: 9.5px; margin-bottom: 4px; gap: 5px; }
+    .report-page .rpt-tip-num { width: 15px; height: 15px; font-size: 8px; }
+    .report-page .rpt-tip-p { font-size: 9.5px; margin-bottom: 4px; }
+    .report-page .rpt-cheer-card p { font-size: 9.5px; line-height: 1.35; }
   }
 </style>
 
@@ -346,57 +375,63 @@
       </div>
 
       <div id="page-student" class="report-page">
-        <div class="rpt-hero">
-          <div class="rpt-hero-title">✨📖 독서 진단 결과 ✨</div>
-          <div id="rpt-name-student" class="rpt-name-badge"></div>
-          <div id="print-subline-student" class="rpt-hero-sub print-only"></div>
-        </div>
-        <div class="rpt-charts-card">
-          <div class="charts-grid">
-            <div class="chart-card">
-              <div class="chart-title">① 5개 대영역</div>
-              <div class="chart-sub">독서흥미·주도성/소통·자신감·가치인식·노력</div>
-              <div id="chart-area-student"></div>
+        <div class="rpt-frame">
+          <div class="rpt-hero">
+            <div class="rpt-hero-title">✨📖 독서 진단 결과 ✨</div>
+            <div id="rpt-name-student" class="rpt-name-badge"></div>
+            <div id="print-subline-student" class="rpt-hero-sub print-only"></div>
+          </div>
+          <div class="rpt-banner-wrap"><div class="rpt-banner">⭐ 나의 독서 진단 ⭐</div></div>
+          <div class="rpt-charts-card">
+            <div class="charts-grid">
+              <div class="chart-card">
+                <div class="chart-title">① 5개 대영역</div>
+                <div class="chart-sub">독서흥미·주도성/소통·자신감·가치인식·노력</div>
+                <div id="chart-area-student"></div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">② 6개 하위영역</div>
+                <div class="chart-sub">어휘·사실·추론·비판·창의·주제통합</div>
+                <div id="chart-category-student"></div>
+              </div>
             </div>
-            <div class="chart-card">
-              <div class="chart-title">② 6개 하위영역</div>
-              <div class="chart-sub">어휘·사실·추론·비판·창의·주제통합</div>
-              <div id="chart-category-student"></div>
+            <div class="legend" style="justify-content:center;">
+              <span><span class="swatch" style="background:var(--series-student)"></span>선택한 학생</span>
+              <span id="avg-legend-label-student"><span class="swatch" style="background:var(--series-avg)"></span>전체 평균</span>
             </div>
           </div>
-          <div class="legend" style="justify-content:center;">
-            <span><span class="swatch" style="background:var(--series-student)"></span>선택한 학생</span>
-            <span id="avg-legend-label-student"><span class="swatch" style="background:var(--series-avg)"></span>전체 평균</span>
-          </div>
+          <div id="narrative-panel-student"></div>
         </div>
-        <div id="narrative-panel-student"></div>
       </div>
 
       <div id="page-parent" class="report-page hidden-tab">
-        <div class="rpt-hero">
-          <div class="rpt-hero-title">✨📖 독서 진단 결과 ✨</div>
-          <div id="rpt-name-parent" class="rpt-name-badge"></div>
-          <div id="print-subline-parent" class="rpt-hero-sub print-only"></div>
-        </div>
-        <div class="rpt-charts-card">
-          <div class="charts-grid">
-            <div class="chart-card">
-              <div class="chart-title">① 5개 대영역</div>
-              <div class="chart-sub">독서흥미·주도성/소통·자신감·가치인식·노력</div>
-              <div id="chart-area-parent"></div>
+        <div class="rpt-frame">
+          <div class="rpt-hero">
+            <div class="rpt-hero-title">✨📖 독서 진단 결과 ✨</div>
+            <div id="rpt-name-parent" class="rpt-name-badge"></div>
+            <div id="print-subline-parent" class="rpt-hero-sub print-only"></div>
+          </div>
+          <div class="rpt-banner-wrap"><div class="rpt-banner">⭐ 나의 독서 진단 ⭐</div></div>
+          <div class="rpt-charts-card">
+            <div class="charts-grid">
+              <div class="chart-card">
+                <div class="chart-title">① 5개 대영역</div>
+                <div class="chart-sub">독서흥미·주도성/소통·자신감·가치인식·노력</div>
+                <div id="chart-area-parent"></div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">② 6개 하위영역</div>
+                <div class="chart-sub">어휘·사실·추론·비판·창의·주제통합</div>
+                <div id="chart-category-parent"></div>
+              </div>
             </div>
-            <div class="chart-card">
-              <div class="chart-title">② 6개 하위영역</div>
-              <div class="chart-sub">어휘·사실·추론·비판·창의·주제통합</div>
-              <div id="chart-category-parent"></div>
+            <div class="legend" style="justify-content:center;">
+              <span><span class="swatch" style="background:var(--series-student)"></span>자녀 점수</span>
+              <span id="avg-legend-label-parent"><span class="swatch" style="background:var(--series-avg)"></span>전체 평균</span>
             </div>
           </div>
-          <div class="legend" style="justify-content:center;">
-            <span><span class="swatch" style="background:var(--series-student)"></span>자녀 점수</span>
-            <span id="avg-legend-label-parent"><span class="swatch" style="background:var(--series-avg)"></span>전체 평균</span>
-          </div>
+          <div id="narrative-panel-parent"></div>
         </div>
-        <div id="narrative-panel-parent"></div>
       </div>
 
       <div class="table-toggle" style="margin-top:16px;">
@@ -628,6 +663,23 @@
     return v.reduce((a, b) => a + b, 0) / v.length;
   }
 
+  // "학년-반-번호" key를 각 구간의 숫자만 뽑아 비교한다.
+  // 문자열 그대로 비교하면 "10번"이 "2번"보다 앞에 오는 등 순서가 뒤섞이는 문제를 막는다.
+  function compareStudentKey(a, b) {
+    function parts(key) {
+      return String(key).split('-').map(function (s) {
+        const m = s.match(/\d+/);
+        return m ? Number(m[0]) : 0;
+      });
+    }
+    const pa = parts(a.key), pb = parts(b.key);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const diff = (pa[i] || 0) - (pb[i] || 0);
+      if (diff !== 0) return diff;
+    }
+    return 0;
+  }
+
   function computeScoresForRow(row, itemCol) {
     const values = QUESTION_MAP.map((q, i) => {
       const col = itemCol[i];
@@ -685,7 +737,7 @@
       const key = grade + '-' + cls + '-' + number;
       byKey[key] = { grade, cls, number, name, key, areaScores, categoryScores }; // 마지막 제출이 우선
     }
-    const students = Object.values(byKey).sort((a, b) => a.key > b.key ? 1 : -1);
+    const students = Object.values(byKey).sort(compareStudentKey);
     if (!students.length) throw new Error('학년/반/번호를 인식하지 못했습니다. 헤더에 "학년", "반", "번호" 문항이 있는지 확인해 주세요.');
 
     const overallArea = {}, overallCategory = {};
@@ -816,11 +868,10 @@
   }
 
   function pointCard(kind, title, desc, tip, mission, score, avg, showScore) {
-    const pillClass = kind === 'strong' ? 'good' : 'warn';
-    const pillLabel = kind === 'strong' ? '잘하고 있어요 (강점)' : '함께 채워봐요 (성장 포인트)';
+    const headText = kind === 'strong' ? '강점' : '보완하면 더 좋아요';
     return '' +
       '<div class="point-card rpt-point-card ' + kind + '">' +
-        '<span class="pill ' + pillClass + '">' + pillLabel + '</span>' +
+        '<div class="rpt-card-icon-head"><span class="rpt-icon-circle ' + kind + '">⭐</span><span class="rpt-card-head-text">' + headText + '</span></div>' +
         '<p class="point-title">' + title + '</p>' +
         '<p class="point-desc">' + desc + '</p>' +
         '<p class="point-tip">' + tip + '</p>' +
@@ -846,7 +897,18 @@
         pointCard('strong', '가장 빛나는 ' + strongLabel + ': ' + g.strong.label, strongInfo.desc, '이미 잘하고 있어요! ' + strongInfo.student, strongInfo.studentMission, g.strong.score, g.strong.avg, false) +
         pointCard('weak', '함께 키워볼 ' + weakLabel + ': ' + g.weak.label, weakInfo.desc, weakInfo.student, weakInfo.studentMission, g.weak.score, g.weak.avg, false) +
       '</div>' +
-      '<div class="closing-note rpt-closing-bar">🌱 지금 점수는 지금의 나일 뿐, 앞으로의 내가 아니에요. 매일 조금씩 실천하다 보면 여름방학이 끝날 때, 그리고 2학기가 끝날 때 훨씬 단단해진 독서 마음을 만나게 될 거예요. 오늘 딱 한 가지만 골라 시작해봐요!</div>';
+      '<div class="point-grid">' +
+        '<div class="rpt-tips-card">' +
+          '<div class="rpt-card-icon-head"><span class="rpt-icon-circle tips">❓</span><span class="rpt-card-head-text">이렇게 활용해요</span></div>' +
+          '<div class="rpt-tip-item"><span class="rpt-tip-num">1</span><span>강점은 계속 유지하고 더 빛내요!</span></div>' +
+          '<div class="rpt-tip-item"><span class="rpt-tip-num">2</span><span>보완 포인트는 매주 1가지 실천하기!</span></div>' +
+          '<div class="rpt-tip-item"><span class="rpt-tip-num">3</span><span>가족, 친구와 함께 이야기 나누기!</span></div>' +
+        '</div>' +
+        '<div class="rpt-cheer-card">' +
+          '<div class="rpt-card-icon-head"><span class="rpt-icon-circle cheer">🌻</span><span class="rpt-card-head-text">응원 메시지</span></div>' +
+          '<p>지금 점수는 지금의 나일 뿐, 앞으로의 내가 아니에요. 매일 조금씩 실천하면 분명 더 멋진 독서가 될 거예요! 오늘 딱 한 가지만 골라 시작해봐요!</p>' +
+        '</div>' +
+      '</div>';
 
     const parentPanel = document.getElementById('narrative-panel-parent');
     parentPanel.innerHTML = '' +
@@ -858,15 +920,18 @@
         pointCard('strong', '강점 ' + strongLabel + ': ' + g.strong.label, strongInfo.desc, strongInfo.parent, null, g.strong.score, g.strong.avg, true) +
         pointCard('weak', '보완 ' + weakLabel + ': ' + g.weak.label, weakInfo.desc, weakInfo.parent, weakInfo.parentMission, g.weak.score, g.weak.avg, true) +
       '</div>' +
-      '<div class="closing-note rpt-closing-bar">' +
-        '<p class="mt-title">🧭 가정에서 함께: 독서 미션지로 메타인지 키우기</p>' +
-        '<p class="mt-p">여름방학 독서 미션지(읽기 전 · 읽으며 · 읽은 후)는 아이가 독서 목적을 분명히 하고 생각을 점검하는 메타인지 훈련에 좋은 도구예요. 책마다 할 수 있는 미션이 달라 7개 중 3개만 해도 충분하고 정답은 없으니, 가정의 어른께서 도구 없이 아래처럼 편하게 함께 봐주세요.</p>' +
-        '<ul class="mt-list">' +
-          '<li><strong>읽기 전:</strong> "이 책, 무슨 이야기일 것 같아?" — 표지만 보고 상상해보게 해주세요.</li>' +
-          '<li><strong>읽는 중, 오늘의 포인트(' + weakLabel + ': ' + g.weak.label + '):</strong> ' + weakInfo.parent + '</li>' +
-          '<li><strong>읽은 후:</strong> 아이가 적은 내용을 같이 읽고 "이거 어떻게 알아냈어?"처럼 대견해하며 물어봐 주세요.</li>' +
-        '</ul>' +
-        '<p class="mt-final">이번 여름방학 미션이 2학기 교과 독서 향상으로 이어질 수 있도록 꾸준히 관심 가져주세요. 정답을 찾기보다 아이 스스로 생각하는 과정을 인정해 주시는 것이 독서 욕구를 키우는 가장 쉬운 방법입니다.</p>' +
+      '<div class="point-grid">' +
+        '<div class="rpt-tips-card">' +
+          '<div class="rpt-card-icon-head"><span class="rpt-icon-circle tips">🧭</span><span class="rpt-card-head-text">미션지로 메타인지 키우기</span></div>' +
+          '<p class="rpt-tip-p">미션지 7개 중 3개만 해도 충분하고 정답은 없어요. 가정의 어른께서 도구 없이 편하게 함께 봐주세요.</p>' +
+          '<div class="rpt-tip-item"><span class="rpt-tip-num">전</span><span>"이 책, 무슨 이야기일 것 같아?" 표지 보고 상상해보기</span></div>' +
+          '<div class="rpt-tip-item"><span class="rpt-tip-num">중</span><span>' + weakLabel + '(' + g.weak.label + ') 포인트: ' + weakInfo.parent + '</span></div>' +
+          '<div class="rpt-tip-item"><span class="rpt-tip-num">후</span><span>적은 내용 같이 읽고 "어떻게 알아냈어?" 물어보기</span></div>' +
+        '</div>' +
+        '<div class="rpt-cheer-card">' +
+          '<div class="rpt-card-icon-head"><span class="rpt-icon-circle cheer">🌻</span><span class="rpt-card-head-text">응원 메시지</span></div>' +
+          '<p>이번 여름방학 미션이 2학기 교과 독서 향상으로 이어지도록 꾸준히 관심 가져주세요. 정답을 찾기보다 아이 스스로 생각하는 과정을 인정해 주시는 것이 독서 욕구를 키우는 가장 쉬운 방법입니다.</p>' +
+        '</div>' +
       '</div>';
   }
 
@@ -891,9 +956,11 @@
     renderTable(student, areaAvg, categoryAvg, SCOPE_LABEL[currentScope]);
     renderNarrative(student, areaAvg, categoryAvg, scopeLabel);
 
-    const name = student.name || (student.grade + '학년 ' + student.cls + '반 ' + student.number + '번');
-    document.getElementById('rpt-name-student').textContent = name;
-    document.getElementById('rpt-name-parent').textContent = name;
+    const classInfo = student.grade + '학년 ' + student.cls + '반 ' + student.number + '번';
+    const name = student.name || classInfo;
+    const nameBadgeText = student.name ? (student.name + ' · ' + classInfo) : classInfo;
+    document.getElementById('rpt-name-student').textContent = nameBadgeText;
+    document.getElementById('rpt-name-parent').textContent = nameBadgeText;
     const printDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
     const subline = name + ' · 비교 기준: ' + SCOPE_LABEL[currentScope] + ' · 출력일 ' + printDate;
     document.getElementById('print-subline-student').textContent = subline;
