@@ -77,6 +77,7 @@ const ID_FIELD_HINTS = {
   grade: ['학년'],
   class: ['반'],
   number: ['번호', '학번', '출석번호', '순번', '번'],
+  name: ['이름', '성명'],
 };
 
 // 36개 문항 정의: area(대영역) / subFactor(있으면) / category(하위영역) / text(문항 원문)
@@ -187,6 +188,12 @@ function buildColumnMap_(headers) {
 function findIdColumns_(headers) {
   const norm = headers.map(h => String(h || ''));
   function find(hints) {
+    // 정확히 일치하는 열을 먼저 찾는다 (예: "학교 이름" 열이 "이름" 힌트에
+    // 부분일치로 먼저 걸려 진짜 "이름" 열보다 앞서 채택되는 것을 방지).
+    for (const hint of hints) {
+      const exact = norm.findIndex(h => h === hint);
+      if (exact !== -1) return exact;
+    }
     for (let i = 0; i < norm.length; i++) {
       for (const hint of hints) {
         if (norm[i].indexOf(hint) !== -1) return i;
@@ -198,6 +205,7 @@ function findIdColumns_(headers) {
     grade: find(ID_FIELD_HINTS.grade),
     class: find(ID_FIELD_HINTS.class),
     number: find(ID_FIELD_HINTS.number),
+    name: find(ID_FIELD_HINTS.name),
   };
 }
 
@@ -265,12 +273,13 @@ function computeAllScores_() {
     const grade = idCols.grade !== -1 ? String(row[idCols.grade]).trim() : '';
     const cls = idCols.class !== -1 ? String(row[idCols.class]).trim() : '';
     const number = idCols.number !== -1 ? String(row[idCols.number]).trim() : '';
+    const name = idCols.name !== -1 ? String(row[idCols.name]).trim() : '';
     if (!grade && !cls && !number) continue; // 빈 행 스킵
 
     const { areaScores, categoryScores } = computeScoresForRow_(row, itemColByIndex);
     students.push({
       rowIndex: r + 1, // 시트상 실제 행 번호(1-based, 헤더 포함)
-      grade, cls, number,
+      grade, cls, number, name,
       key: normalizeIdValue_(grade) + '-' + normalizeIdValue_(cls) + '-' + normalizeIdValue_(number),
       areaScores, categoryScores,
       timestamp: row[0],
@@ -332,7 +341,7 @@ function writeResultSheet_() {
   if (!sheet) sheet = ss.insertSheet(RESULT_SHEET_NAME);
   sheet.clear();
 
-  const headers = ['학년', '반', '번호',
+  const headers = ['학년', '반', '번호', '이름',
     ...AREA_ORDER.map(a => QUESTION_MAP.find(q => q.area === a).areaLabel),
     ...CATEGORY_ORDER,
   ];
@@ -342,14 +351,14 @@ function writeResultSheet_() {
     .sort((a, b) => (a.key > b.key ? 1 : -1))
     .forEach(s => {
       sheet.appendRow([
-        s.grade, s.cls, s.number,
+        s.grade, s.cls, s.number, s.name,
         ...AREA_ORDER.map(a => round1_(s.areaScores[a])),
         ...CATEGORY_ORDER.map(c => round1_(s.categoryScores[c])),
       ]);
     });
 
   sheet.appendRow(new Array(headers.length).fill('')); // 빈 줄 하나 (appendRow는 완전히 빈 배열을 허용하지 않음)
-  sheet.appendRow(['전체 평균', '', '',
+  sheet.appendRow(['전체 평균', '', '', '',
     ...AREA_ORDER.map(a => round1_(all.overallArea[a])),
     ...CATEGORY_ORDER.map(c => round1_(all.overallCategory[c])),
   ]);
@@ -418,7 +427,7 @@ function getAdminRoster(passcode) {
         if (category[i] != null && category[i] < weakestScore) { weakestScore = category[i]; weakestCat = c; }
       });
       return {
-        grade: s.grade, cls: s.cls, number: s.number,
+        grade: s.grade, cls: s.cls, number: s.number, name: s.name,
         area, category, weakestCat,
         timestamp: s.timestamp instanceof Date ? s.timestamp.toISOString() : String(s.timestamp || ''),
       };
@@ -466,7 +475,7 @@ function getStudentReport(grade, cls, number) {
   return {
     found: true,
     count: all.count,
-    grade: student.grade, cls: student.cls, number: student.number,
+    grade: student.grade, cls: student.cls, number: student.number, name: student.name,
     areaLabels: AREA_ORDER.map(a => QUESTION_MAP.find(q => q.area === a).areaLabel),
     areaKeys: AREA_ORDER,
     categoryLabels: CATEGORY_ORDER,

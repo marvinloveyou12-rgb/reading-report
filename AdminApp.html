@@ -127,6 +127,64 @@
     .pill-warn { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--status-warn); background: var(--status-warn-bg); border-radius: 999px; padding: 3px 9px; }
     a.view-link { color: var(--accent); font-weight: 600; text-decoration: none; font-size: 12.5px; }
     .hidden { display: none !important; }
+
+    /* ---- 반별 일괄 인쇄: 학생 리포트 카드(강점/성장 포인트) ---- */
+    .narrative-intro { font-size: 13.5px; line-height: 1.6; color: var(--text-secondary); margin: 0 0 10px; }
+    .narrative-summary { font-size: 13px; line-height: 1.55; margin: 0 0 12px; padding: 9px 13px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); }
+    .narrative-summary strong { color: var(--text-primary); }
+    .point-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .point-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface-2); }
+    .point-card .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 10px; margin-bottom: 8px; }
+    .point-card .point-title { font-size: 14.5px; font-weight: 700; margin: 0 0 5px; }
+    .point-card .point-desc { font-size: 12px; color: var(--text-muted); margin: 0 0 8px; line-height: 1.5; }
+    .point-card .point-tip { font-size: 13.5px; color: var(--text-primary); line-height: 1.55; margin: 0; }
+    .point-card .point-mission { font-size: 12.5px; color: var(--text-primary); line-height: 1.5; margin: 7px 0 0; padding-top: 7px; border-top: 1px dashed var(--border); }
+    .point-card .point-mission strong { color: var(--accent); }
+    .point-card .point-score { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
+    .closing-note { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: var(--status-good-bg); border: 1px solid var(--border); font-size: 13px; line-height: 1.55; }
+    .closing-note ul { margin: 0 0 8px; padding-left: 18px; line-height: 1.6; }
+    .closing-note .mt-title { margin: 0 0 8px; font-weight: 700; }
+    .closing-note .mt-p { margin: 0 0 8px; }
+    .closing-note .mt-list { margin: 0 0 8px; padding-left: 18px; line-height: 1.6; }
+    .closing-note .mt-final { margin: 0; }
+
+    .batch-page { margin-bottom: 16px; }
+    .batch-head { margin-bottom: 12px; }
+    .batch-head-title { font-size: 18px; font-weight: 800; }
+    .batch-head-sub { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+    .batch-page .chart-box svg { max-width: 190px; }
+
+    @media print {
+      @page { size: A4; margin: 10mm; }
+      body { background: #fff; }
+      .batch-page { page-break-after: always; border: none; border-radius: 0; padding: 0; }
+      .batch-page:last-child { page-break-after: auto; }
+      .point-card, .chart-box, .narrative-summary, .closing-note { break-inside: avoid; }
+      .charts-grid { break-inside: avoid; }
+
+      .batch-head { margin-bottom: 8px; }
+      .batch-head-title { font-size: 16px; }
+      .batch-head-sub { font-size: 11px; margin-top: 2px; }
+      .batch-page .charts-grid { gap: 8px; margin-top: 0; }
+      .batch-page .chart-box .chart-title { font-size: 13px; margin-bottom: 0; }
+      .batch-page .chart-box svg { max-width: 150px; }
+      .batch-page .legend-mini { font-size: 11px; margin: 2px 0 6px !important; }
+      .batch-page .narrative-intro { font-size: 12px; line-height: 1.42; margin-bottom: 5px; }
+      .batch-page .narrative-summary { font-size: 11.5px; line-height: 1.4; padding: 6px 10px; margin-bottom: 7px; }
+      .batch-page .point-grid { gap: 7px; }
+      .batch-page .point-card { padding: 7px 9px; }
+      .batch-page .point-card .pill { font-size: 10.5px; padding: 3px 8px; margin-bottom: 5px; }
+      .batch-page .point-card .point-title { font-size: 12.5px; margin-bottom: 3px; }
+      .batch-page .point-card .point-desc { font-size: 10.5px; margin-bottom: 4px; line-height: 1.35; }
+      .batch-page .point-card .point-tip { font-size: 11.5px; line-height: 1.38; }
+      .batch-page .point-card .point-mission { font-size: 11px; margin-top: 4px; padding-top: 4px; }
+      .batch-page .point-card .point-score { font-size: 10px; margin-top: 4px; }
+      .batch-page .closing-note { font-size: 11px; line-height: 1.38; padding: 7px 10px; margin-top: 7px; }
+      .batch-page .closing-note .mt-title { margin-bottom: 4px; }
+      .batch-page .closing-note .mt-p { margin-bottom: 4px; }
+      .batch-page .closing-note .mt-list { margin-bottom: 4px; padding-left: 14px; line-height: 1.35; }
+      .batch-page .closing-note .mt-list li { margin-bottom: 2px; }
+    }
   </style>
 </head>
 <body>
@@ -198,6 +256,19 @@
       </div>
 
       <div class="card">
+        <p class="section-title">반별 일괄 인쇄</p>
+        <p class="section-sub">반을 선택하면 그 반 학생 전원의 리포트(학생 1명당 A4 1장, 같은 반 평균과 비교)를 한 파일로 모아 다운로드합니다. 다운로드한 파일을 열어 인쇄하면 여러 장이 한 번에 출력돼요.</p>
+        <div class="select-row" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <select id="batch-class-picker">
+            <option value="">반을 선택하세요</option>
+          </select>
+          <button id="btn-batch-student">⬇️ 학생용 전체 다운로드</button>
+          <button id="btn-batch-parent" class="ghost-btn">⬇️ 학부모용 전체 다운로드</button>
+        </div>
+        <div id="batch-msg" class="msg" style="color: var(--text-muted);"></div>
+      </div>
+
+      <div class="card">
         <div class="table-toolbar">
           <span class="hint">열 제목을 클릭하면 정렬됩니다 · 낮은 점수는 "관찰" 열에 자동 표시됩니다</span>
           <button id="btn-export" class="ghost-btn">CSV로 내보내기</button>
@@ -248,6 +319,247 @@
       '창의': { desc: '읽은 내용을 생활·경험에 연결해 새롭게 표현하는 힘', tip: '그리기, 역할극, 뒷이야기 상상 등 다양한 독후 표현 활동을 함께 해보세요.' },
       '주제통합': { desc: '같은 주제의 여러 책을 비교하며 통합적으로 이해하는 힘', tip: '같은 주제의 책 2~3권을 함께 대출해 비교하며 읽는 활동을 제안해보세요.' },
     };
+
+    // ---------- 반별 일괄 인쇄용: 강점/성장 포인트 안내 문구 (학생용·학부모용, 도구 불필요) ----------
+    const AREA_INFO = {
+      'Ⅰ': {
+        label: '독서흥미와 몰입', desc: '책을 읽는 순간 자체를 즐기고 몰입하는 힘이에요.',
+        student: '재미있어 보이는 책을 마음대로 골라 편하게 읽는 시간을 늘려보세요. 완독 부담 없이 그림이 많거나 좋아하는 주제의 책부터 시작해도 좋아요.',
+        parent: '완독이나 학습 목적을 강조하기보다 아이가 흥미를 느끼는 주제(만화, 그림책, 좋아하는 시리즈 등)부터 자유롭게 고르도록 허용해 주세요. 부모가 먼저 즐겁게 책을 읽는 모습을 보여주는 것도 큰 도움이 됩니다.',
+        studentMission: '이번 주: 표지만 보고 끌리는 책 1권을 골라 10쪽만 가볍게 읽어보기',
+        parentMission: '이번 주: 집에 있는 책 중 아이가 표지만 보고 3권을 직접 골라보게 하고 왜 골랐는지 물어보기',
+      },
+      'Ⅱ': {
+        label: '독서주도성과 소통', desc: '스스로 책을 고르고 읽는 힘, 그리고 읽은 내용을 다른 사람과 나누는 힘이에요.',
+        student: '이번엔 내가 직접 읽고 싶은 책을 골라보고, 다 읽은 후엔 가족이나 친구에게 어떤 이야기였는지 짧게 소개해보세요.',
+        parent: '아이가 직접 책을 고르도록 기회를 주시고, 식사 시간 등에 "오늘 읽은 책 어땠어?"라고 자연스럽게 물어봐 주세요. 정답을 요구하지 않는 편안한 대화가 소통 능력을 키웁니다.',
+        studentMission: '이번 주: 내가 고른 책 1권을 다 읽고 가족에게 1분 동안 소개해보기',
+        parentMission: '이번 주: 저녁 식사 시간에 "오늘 읽은 책 한 줄 소개" 대화를 3번 나누기',
+      },
+      'Ⅲ': {
+        label: '독서자신감', desc: '책을 읽고 이해하는 나의 능력을 스스로 믿는 마음이에요.',
+        student: '어려운 책보다 내가 쉽게 읽을 수 있는 책으로 "나는 잘 읽을 수 있다"는 성공 경험을 쌓아보세요. 작은 성공이 모이면 자신감이 커져요.',
+        parent: '아이의 읽기 수준보다 약간 쉬운 책을 함께 골라 완독 성공 경험을 반복하게 해주세요. 결과보다 노력과 과정을 구체적으로 칭찬해 주시는 것이 자신감 형성에 효과적입니다.',
+        studentMission: '이번 주: 쉬운 책 1권을 끝까지 읽고 가족에게 "나 완독했다!"라고 자랑하듯 말해보기',
+        parentMission: '이번 주: 완독할 때마다 "어려운 부분도 포기 안 했네" 처럼 구체적으로 칭찬하는 말 3번 해주기',
+      },
+      'Ⅳ': {
+        label: '독서가치와 목적인식', desc: '나에게 독서가 왜 중요한지, 무엇을 위해 읽는지 아는 마음이에요.',
+        student: '책을 다 읽은 뒤 "이 책에서 무엇을 얻었지?", "왜 이 책이 나에게 도움이 될까?"를 스스로 생각해보는 습관을 가져보세요.',
+        parent: '독서를 성적이나 숙제와 연결짓기보다 "이 책에서 어떤 부분이 좋았어?", "너에게 어떤 도움이 됐어?" 같은 질문으로 아이 스스로 독서의 의미를 발견하도록 도와주세요.',
+        studentMission: '이번 주: 책을 다 읽고 "이 책에서 얻은 것 1가지"를 가족에게 말로 들려주기',
+        parentMission: '이번 주: "이 책에서 어떤 도움을 받았어?"라는 질문을 2번 던지기',
+      },
+      'Ⅴ': {
+        label: '독서노력과 마음가짐', desc: '꾸준히 노력하면 독서 능력이 좋아진다고 믿는, 성장하는 마음이에요.',
+        student: '매일 15분씩이라도 꾸준히 읽는 습관을 만들어보세요. 오늘 잘 안 되더라도 어제보다 한 줄 더 읽었다면 그것도 멋진 성장이에요.',
+        parent: '결과(다 읽었는지, 이해했는지)보다 "오늘도 책을 펼쳤다"는 과정 자체를 인정하고 격려해 주세요. 꾸준함에 대한 긍정적 피드백이 노력을 지속하는 큰 힘이 됩니다.',
+        studentMission: '이번 주: 매일 같은 시간(예: 저녁 먹기 전) 15분씩 책 읽기를 5일 도전해보기',
+        parentMission: '이번 주: 아이가 책을 펼친 날마다 "오늘도 책 폈네!"라고 말로 알아봐주기',
+      },
+    };
+    const CATEGORY_INFO = {
+      '어휘': {
+        desc: '새로운 낱말을 알아가고 활용하는 힘이에요.',
+        student: '책을 읽다 모르는 단어가 나오면 잠깐 멈추고, 무슨 뜻일지 스스로 먼저 짐작해본 뒤 가족에게 물어보세요.',
+        parent: '낯선 단어가 나오면 바로 뜻을 알려주기보다 "무슨 뜻일 것 같아?"라고 먼저 물어봐 주세요.',
+        studentMission: '이번 주: 모르는 단어를 발견할 때마다 가족에게 뜻을 같이 추측해보자고 말해보기',
+        parentMission: '이번 주: 모르는 단어가 나올 때 "무슨 뜻일 것 같아?"라고 먼저 물어보는 낱말 대화를 2번 나누기',
+      },
+      '사실': {
+        desc: '글에 드러난 내용을 정확히 파악하는 힘이에요.',
+        student: '책을 읽고 "누가, 언제, 어디서, 무엇을 했는지" 가족에게 말로 설명해보는 연습을 해보세요.',
+        parent: '책을 읽은 후 "주인공이 누구였어?", "무슨 일이 있었어?" 같은 육하원칙 질문으로 내용을 함께 되짚어봐 주세요.',
+        studentMission: '이번 주: 책 1권을 읽고 누가·언제·어디서·무엇을 했는지 가족에게 말로 요약해 들려주기',
+        parentMission: '이번 주: 책을 읽은 후 육하원칙 질문을 던지며 함께 내용을 정리해보기 1회',
+      },
+      '추론': {
+        desc: '글에 직접 나오지 않은 숨은 뜻을 짐작하는 힘이에요.',
+        student: '"왜 그랬을까?", "다음엔 어떻게 될까?"를 스스로 질문하며 읽어보세요. 정답이 없어도 괜찮아요, 상상하는 것 자체가 힘이 돼요.',
+        parent: '"주인공이 왜 그런 행동을 했을까?" 같은 열린 질문을 던지고, 아이의 답에 "그렇게 생각한 이유가 뭐야?"로 한 번 더 이어가 주세요.',
+        studentMission: '이번 주: 책을 읽다 궁금한 점이 생기면 그 자리에서 바로 가족에게 물어보기',
+        parentMission: '이번 주: 열린 질문 후 "왜 그렇게 생각했어?"라고 되묻는 대화 2번 나누기',
+      },
+      '비판': {
+        desc: '내 생각과 책 속 생각을 비교하고 판단하는 힘이에요.',
+        student: '책 속 인물의 생각에 동의하는지, 아니라면 나라면 어떻게 했을지 생각해보고 이야기해보세요.',
+        parent: '"너라면 어떻게 했을 것 같아?", "이 이야기에 동의해?"처럼 아이 자신의 의견을 묻고, 다르게 생각해도 존중해주는 대화를 나눠주세요.',
+        studentMission: '이번 주: 주인공에게 동의하는지 아닌지, 이유와 함께 말해보기',
+        parentMission: '이번 주: "너라면 어떻게 했을까?" 대화를 1번 나누기',
+      },
+      '창의': {
+        desc: '읽은 내용을 내 생활과 경험에 연결해 새롭게 표현하는 힘이에요.',
+        student: '책 내용을 떠올리며 뒷이야기를 상상해서 가족에게 이야기로 들려주세요.',
+        parent: '독후 활동으로 역할극이나 뒷이야기 상상해서 말하기 같은 표현 활동을 함께 시도해보시면 좋습니다.',
+        studentMission: '이번 주: 읽은 책의 뒷이야기를 상상해서 가족에게 이야기로 들려주기',
+        parentMission: '이번 주: 책 속 인물이 되어보는 짧은 역할극이나 흉내내기를 1회 함께 해보기',
+      },
+      '주제통합': {
+        desc: '같은 주제의 여러 책을 비교하며 통합적으로 이해하는 힘이에요.',
+        student: '집에 있는 책 중 같은 주제(예: 동물, 우정)를 다룬 책 2권을 골라 비교하며 읽어보세요. 무엇이 비슷하고 무엇이 다른지 찾아보는 재미가 있어요.',
+        parent: '집에 있는 책 중 같은 주제의 책 2권을 함께 골라 비교하며 읽는 활동을 제안해보세요. 공통점과 차이점을 이야기 나누면 통합적 사고력이 자랍니다.',
+        studentMission: '이번 주: 집에 있는 책 중 같은 주제 2권을 골라 비교하며 읽어보기',
+        parentMission: '이번 주: 집에 있는 책 중 같은 주제의 책 2권을 함께 골라 비교하며 읽어보기',
+      },
+    };
+    function infoForBatch(item) {
+      return item.type === 'area' ? AREA_INFO[item.key] : CATEGORY_INFO[item.key];
+    }
+
+    function analyzeStudentGaps(student, avgArea, avgCategory) {
+      const areaItems = ROSTER.areaKeys.map((key, i) => ({
+        type: 'area', key, label: ROSTER.areaLabels[i],
+        score: student.area[i], avg: avgArea[i],
+      }));
+      const catItems = ROSTER.categoryLabels.map((key, i) => ({
+        type: 'category', key, label: key,
+        score: student.category[i], avg: avgCategory[i],
+      }));
+      const combined = areaItems.concat(catItems)
+        .filter(r => r.score != null && r.avg != null)
+        .map(r => Object.assign(r, { gap: r.score - r.avg }))
+        .sort((x, y) => x.gap - y.gap);
+      const aboveCount = combined.filter(r => r.gap > 0.05).length;
+      return { weak: combined[0], strong: combined[combined.length - 1], totalCount: combined.length, aboveCount };
+    }
+
+    function pointCardBatch(kind, title, desc, tip, mission, score, avg, showScore) {
+      const pillClass = kind === 'strong' ? 'good' : 'warn';
+      const pillLabel = kind === 'strong' ? '잘하고 있어요 (강점)' : '함께 채워봐요 (성장 포인트)';
+      return '' +
+        '<div class="point-card">' +
+          '<span class="pill ' + pillClass + '">' + pillLabel + '</span>' +
+          '<p class="point-title">' + title + '</p>' +
+          '<p class="point-desc">' + desc + '</p>' +
+          '<p class="point-tip">' + tip + '</p>' +
+          (mission ? '<p class="point-mission"><strong>' + (kind === 'strong' ? '계속 이렇게 →' : '이번 주 미션 →') + '</strong> ' + mission + '</p>' : '') +
+          (showScore ? '<p class="point-score">' + fmt(score) + '점 · 반 평균 ' + fmt(avg) + '점 (5점 만점, 차이 ' + gapText(score - avg) + ')</p>' : '') +
+        '</div>';
+    }
+
+    function buildStudentPageHTML(student, avgAreaArr, avgCategoryArr, audience) {
+      const g = analyzeStudentGaps(student, avgAreaArr, avgCategoryArr);
+      const strongInfo = infoForBatch(g.strong), weakInfo = infoForBatch(g.weak);
+      const strongLabel = g.strong.type === 'area' ? '대영역' : '읽기 힘';
+      const weakLabel = g.weak.type === 'area' ? '대영역' : '읽기 힘';
+      const name = student.name || (gradeLabel(student.grade) + ' ' + clsLabel(student.cls) + ' ' + student.number + '번');
+
+      const areaContainer = document.createElement('div');
+      const catContainer = document.createElement('div');
+      buildRadar(areaContainer, ROSTER.areaLabels, student.area, SCALE_MIN, SCALE_MAX, avgAreaArr, 200);
+      buildRadar(catContainer, ROSTER.categoryLabels, student.category, SCALE_MIN, SCALE_MAX, avgCategoryArr, 200);
+
+      let narrativeHTML;
+      if (audience === 'parent') {
+        narrativeHTML = '' +
+          '<p class="narrative-intro">자녀(' + name + ')의 독서 사전 진단 결과입니다. 같은 반 평균과 비교한 강점과 보완이 필요한 부분을 확인하시고, 가정에서의 독서 지도에 참고해 주세요.</p>' +
+          '<p class="narrative-summary">📊 5개 대영역과 6개 읽기 기능 중 <strong>' + g.aboveCount + '개 / ' + g.totalCount + '개</strong>가 같은 반 평균보다 높은 결과를 보였습니다.</p>' +
+          '<div class="point-grid">' +
+            pointCardBatch('strong', '강점 ' + strongLabel + ': ' + g.strong.label, strongInfo.desc, strongInfo.parent, null, g.strong.score, g.strong.avg, true) +
+            pointCardBatch('weak', '보완 ' + weakLabel + ': ' + g.weak.label, weakInfo.desc, weakInfo.parent, weakInfo.parentMission, g.weak.score, g.weak.avg, true) +
+          '</div>' +
+          '<div class="closing-note">' +
+            '<p class="mt-title">🧭 가정에서 함께: 독서 미션지로 메타인지 키우기</p>' +
+            '<p class="mt-p">여름방학 독서 미션지(읽기 전 · 읽으며 · 읽은 후)는 아이가 독서 목적을 분명히 하고 생각을 점검하는 메타인지 훈련에 좋은 도구예요. 책마다 할 수 있는 미션이 달라 7개 중 3개만 해도 충분하고 정답은 없으니, 가정의 어른께서 도구 없이 아래처럼 편하게 함께 봐주세요.</p>' +
+            '<ul class="mt-list">' +
+              '<li><strong>읽기 전:</strong> "이 책, 무슨 이야기일 것 같아?" — 표지만 보고 상상해보게 해주세요.</li>' +
+              '<li><strong>읽는 중, 오늘의 포인트(' + weakLabel + ': ' + g.weak.label + '):</strong> ' + weakInfo.parent + '</li>' +
+              '<li><strong>읽은 후:</strong> 아이가 적은 내용을 같이 읽고 "이거 어떻게 알아냈어?"처럼 대견해하며 물어봐 주세요.</li>' +
+            '</ul>' +
+            '<p class="mt-final">이번 여름방학 미션이 2학기 교과 독서 향상으로 이어질 수 있도록 꾸준히 관심 가져주세요. 정답을 찾기보다 아이 스스로 생각하는 과정을 인정해 주시는 것이 독서 욕구를 키우는 가장 쉬운 방법입니다.</p>' +
+          '</div>';
+      } else {
+        narrativeHTML = '' +
+          '<p class="narrative-intro">' + name + ' 친구, 사전 진단 결과를 살펴봤어요! 같은 반 평균과 비교했을 때 나의 독서 마음이 어디에서 반짝이고, 어디를 더 채우면 좋을지 알려줄게요.</p>' +
+          '<p class="narrative-summary">📊 5개 대영역과 6개 읽기 힘 중 <strong>' + g.aboveCount + '개 / ' + g.totalCount + '개</strong>가 같은 반 평균보다 높게 나왔어요.</p>' +
+          '<div class="point-grid">' +
+            pointCardBatch('strong', '가장 빛나는 ' + strongLabel + ': ' + g.strong.label, strongInfo.desc, '이미 잘하고 있어요! ' + strongInfo.student, strongInfo.studentMission, g.strong.score, g.strong.avg, false) +
+            pointCardBatch('weak', '함께 키워볼 ' + weakLabel + ': ' + g.weak.label, weakInfo.desc, weakInfo.student, weakInfo.studentMission, g.weak.score, g.weak.avg, false) +
+          '</div>' +
+          '<div class="closing-note">🌱 지금 점수는 지금의 나일 뿐, 앞으로의 내가 아니에요. 매일 조금씩 실천하다 보면 훨씬 단단해진 독서 마음을 만나게 될 거예요. 오늘 딱 한 가지만 골라 시작해봐요!</div>';
+      }
+
+      const printDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+      const audienceLabel = audience === 'parent' ? '학부모용' : '학생용';
+
+      return '' +
+        '<div class="card batch-page">' +
+          '<div class="batch-head">' +
+            '<div class="batch-head-title">독서 진단 리포트 · ' + audienceLabel + '</div>' +
+            '<div class="batch-head-sub">' + name + ' · 출력일 ' + printDate + '</div>' +
+          '</div>' +
+          '<div class="charts-grid">' +
+            '<div class="chart-box"><div class="chart-title">① 5개 대영역</div>' + areaContainer.innerHTML + '</div>' +
+            '<div class="chart-box"><div class="chart-title">② 6개 하위영역</div>' + catContainer.innerHTML + '</div>' +
+          '</div>' +
+          '<div class="legend-mini" style="margin:-2px 0 10px;">' +
+            '<span><span class="dot" style="background:var(--accent)"></span>학생 점수</span>' +
+            '<span><span class="dot" style="background:var(--status-good)"></span>같은 반 평균</span>' +
+          '</div>' +
+          narrativeHTML +
+        '</div>';
+    }
+
+    function populateBatchClassPicker() {
+      const groups = {};
+      ROSTER.roster.forEach(s => {
+        const key = s.grade + '|' + s.cls;
+        if (!groups[key]) groups[key] = { key, label: gradeLabel(s.grade) + ' ' + clsLabel(s.cls), count: 0 };
+        groups[key].count++;
+      });
+      const picker = document.getElementById('batch-class-picker');
+      const options = Object.values(groups)
+        .sort((a, b) => a.key > b.key ? 1 : -1)
+        .map(g => '<option value="' + g.key + '">' + g.label + ' (' + g.count + '명)</option>')
+        .join('');
+      picker.innerHTML = '<option value="">반을 선택하세요</option>' + options;
+    }
+
+    function buildClassBatchHTML(gradeKey, clsKey, audience) {
+      const students = ROSTER.roster
+        .filter(s => s.grade === gradeKey && s.cls === clsKey)
+        .slice()
+        .sort((a, b) => Number(String(a.number).replace(/\D/g, '')) - Number(String(b.number).replace(/\D/g, '')));
+
+      const avgAreaArr = ROSTER.areaLabels.map((_, i) => average(students.map(s => s.area[i])));
+      const avgCategoryArr = ROSTER.categoryLabels.map((_, i) => average(students.map(s => s.category[i])));
+
+      const pagesHTML = students.map(s => buildStudentPageHTML(s, avgAreaArr, avgCategoryArr, audience)).join('');
+      const styleContent = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
+      const audienceLabel = audience === 'parent' ? '학부모용' : '학생용';
+      const classLabel = gradeLabel(gradeKey) + ' ' + clsLabel(clsKey);
+      const title = classLabel + '_' + audienceLabel + '_전체_독서진단리포트';
+
+      const html = '<!doctype html><html><head><meta charset="utf-8"><title>' + title + '</title><style>' +
+        styleContent +
+        '\nbody{ margin:0; padding: 20px 16px 40px; } .dl-toolbar{ text-align:center; padding-bottom:16px; } ' +
+        '.dl-toolbar button{ padding:12px 26px; font-size:15.5px; font-weight:700; border-radius:10px; border:none; background:#2a78d6; color:#fff; cursor:pointer; } ' +
+        '@media print{ .dl-toolbar{ display:none !important; } } ' +
+        '</style></head><body>' +
+        '<div class="dl-toolbar"><button onclick="window.print()">🖨️ 전체 인쇄 / PDF로 저장 (' + students.length + '장)</button></div>' +
+        '<div style="max-width:900px; margin:0 auto;">' + pagesHTML + '</div>' +
+        '</body></html>';
+
+      return { title, html, count: students.length };
+    }
+
+    function downloadClassBatch(audience) {
+      const msg = document.getElementById('batch-msg');
+      const val = document.getElementById('batch-class-picker').value;
+      if (!val) { msg.textContent = '반을 먼저 선택해 주세요.'; return; }
+      const [gradeKey, clsKey] = val.split('|');
+      const { title, html, count } = buildClassBatchHTML(gradeKey, clsKey, audience);
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = title + '.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      msg.textContent = count + '명 분량의 파일을 다운로드했습니다. 파일을 열어 인쇄해 주세요.';
+    }
 
     function computeGroupAverages(labelFn, keyFn) {
       const groups = {};
@@ -437,6 +749,7 @@
       buildRadar(document.getElementById('chart-area'), ROSTER.areaLabels, ROSTER.overallArea, SCALE_MIN, SCALE_MAX);
       buildRadar(document.getElementById('chart-category'), ROSTER.categoryLabels, ROSTER.overallCategory, SCALE_MIN, SCALE_MAX);
       populateStudentPicker();
+      populateBatchClassPicker();
       renderGroupSection('groups-grade', s => gradeLabel(s.grade), s => s.grade);
       renderGroupSection('groups-class', s => gradeLabel(s.grade) + ' ' + clsLabel(s.cls), s => s.grade + '|' + s.cls);
       renderBarList('bar-area', ROSTER.areaLabels, ROSTER.overallArea);
@@ -448,7 +761,7 @@
     function populateStudentPicker() {
       const picker = document.getElementById('student-picker');
       const options = ROSTER.roster.map((s, i) =>
-        '<option value="' + i + '">' + gradeLabel(s.grade) + ' ' + clsLabel(s.cls) + ' ' + s.number + '번</option>'
+        '<option value="' + i + '">' + gradeLabel(s.grade) + ' ' + clsLabel(s.cls) + ' ' + s.number + '번' + (s.name ? ' · ' + s.name : '') + '</option>'
       ).join('');
       picker.innerHTML = '<option value="">학생을 선택하세요</option>' + options;
     }
@@ -459,21 +772,21 @@
       if (idx === '') { output.innerHTML = ''; return; }
       const s = ROSTER.roster[Number(idx)];
       output.innerHTML = groupCardHTML({
-        label: gradeLabel(s.grade) + ' ' + clsLabel(s.cls) + ' ' + s.number + '번',
+        label: gradeLabel(s.grade) + ' ' + clsLabel(s.cls) + ' ' + s.number + '번' + (s.name ? ' · ' + s.name : ''),
         count: null, // 개인 조회이므로 "N명" 대신 안내 문구를 보여줌 (groupCardHTML에서 처리)
         areaAvg: s.area, categoryAvg: s.category,
       });
     }
 
     function tableColumns() {
-      return ['학년', '반', '번호']
+      return ['학년', '반', '번호', '이름']
         .concat(ROSTER.areaLabels)
         .concat(ROSTER.categoryLabels)
         .concat(['관찰 필요', '']);
     }
 
     function rowValues(s) {
-      return [s.grade, s.cls, s.number].concat(s.area).concat(s.category).concat([s.weakestCat || '-']);
+      return [s.grade, s.cls, s.number, s.name || '-'].concat(s.area).concat(s.category).concat([s.weakestCat || '-']);
     }
 
     function renderTable() {
@@ -489,7 +802,7 @@
       });
 
       document.getElementById('roster-body').innerHTML = rows.map(s => {
-        const cells = [s.grade, s.cls, s.number]
+        const cells = [s.grade, s.cls, s.number, s.name || '-']
           .map(v => '<td>' + v + '</td>').join('') +
           s.area.map(v => '<td>' + fmt(v) + '</td>').join('') +
           s.category.map(v => '<td>' + fmt(v) + '</td>').join('') +
@@ -522,6 +835,8 @@
     document.getElementById('in-passcode').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
     document.getElementById('btn-export').addEventListener('click', exportCSV);
     document.getElementById('student-picker').addEventListener('change', renderStudentPickerOutput);
+    document.getElementById('btn-batch-student').addEventListener('click', function () { downloadClassBatch('student'); });
+    document.getElementById('btn-batch-parent').addEventListener('click', function () { downloadClassBatch('parent'); });
     document.getElementById('roster-head').addEventListener('click', function (e) {
       const th = e.target.closest('th');
       if (!th) return;
